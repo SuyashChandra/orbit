@@ -1,0 +1,84 @@
+name: API — Build & Deploy
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'apps/api/**'
+      - 'packages/shared/**'
+      - '.github/workflows/api.yml'
+  pull_request:
+    branches: [main]
+    paths:
+      - 'apps/api/**'
+      - 'packages/shared/**'
+
+env:
+  PROJECT_ID: ${{ secrets.GCP_PROJECT_ID }}
+  REGION: us-central1
+  SERVICE: orbit-api
+  IMAGE: ${{ secrets.GCP_REGION }}-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/orbit/api
+
+jobs:
+  lint-typecheck:
+    name: Lint & Typecheck
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm --filter @orbit/api typecheck
+      - run: pnpm --filter @orbit/api lint
+
+  deploy:
+    name: Deploy to Cloud Run
+    needs: lint-typecheck
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write  # Workload Identity Federation
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - id: auth
+        uses: google-github-actions/auth@v2
+        with:
+          workload_identity_provider: ${{ secrets.GCP_WORKLOAD_IDENTITY_PROVIDER }}
+          service_account: ${{ secrets.GCP_SERVICE_ACCOUNT }}
+
+      - uses: google-github-actions/setup-gcloud@v2
+
+      - name: Configure Docker for Artifact Registry
+        run: gcloud auth configure-docker ${{ secrets.GCP_REGION }}-docker.pkg.dev
+
+      - name: Build & push image
+        run: |
+          docker build \
+            -f apps/api/Dockerfile \
+            -t $IMAGE:${{ github.sha }} \
+            -t $IMAGE:latest \
+            .
+          docker push $IMAGE:${{ github.sha }}
+          docker push $IMAGE:latest
+
+      - name: Deploy to Cloud Run
+        run: |
+          gcloud run deploy $SERVICE \
+            --image $IMAGE:${{ github.sha }} \
+            --region $REGION \
+            --platform managed \
+            --allow-unauthenticated \
+            --min-instances 0 \
+            --max-instances 3 \
+            --memory 512Mi \
+            --cpu 1 \
+            --set-secrets="DATABASE_URL=orbit-database-url:latest,JWT_SECRET=orbit-jwt-secret:latest,JWT_REFRESH_SECRET=orbit-jwt-refresh-secret:latest,GOOGLE_CLIENT_ID=orbit-google-client-id:latest,GOOGLE_CLIENT_SECRET=orbit-google-client-secret:latest,VAPID_PUBLIC_KEY=orbit-vapid-public-key:latest,VAPID_PRIVATE_KEY=orbit-vapid-private-key:latest,VAPID_SUBJECT=orbit-vapid-subject:latest,GCS_BUCKET=orbit-gcs-bucket:latest,GCP_PROJECT_ID=orbit-gcp-project-id:latest,APP_URL=orbit-app-url:latest,API_URL=orbit-api-url:latest" \
+            --set-env-vars="NODE_ENV=production"

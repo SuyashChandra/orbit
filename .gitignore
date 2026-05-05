@@ -44,8 +44,5 @@ dist-types-node/
 .claude/settings.local.json
 CLAUDE.md
 
-#Github workflows
-.github/workflows
-
 
 PROGRESS.md
