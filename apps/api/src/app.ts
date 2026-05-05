@@ -8,11 +8,10 @@ import rateLimit from '@fastify/rate-limit';
 import { env } from './lib/env.js';
 
 const app = Fastify({
-  logger: {
-    level: env.NODE_ENV === 'production' ? 'info' : 'debug',
-    transport:
-      env.NODE_ENV !== 'production' ? { target: 'pino-pretty' } : undefined,
-  },
+  logger:
+    env.NODE_ENV === 'production'
+      ? { level: 'info' }
+      : { level: 'debug', transport: { target: 'pino-pretty' } },
 });
 
 await app.register(helmet, { contentSecurityPolicy: false });

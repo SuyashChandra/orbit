@@ -8,10 +8,9 @@ export default defineConfig({
     styleX({
       fileName: 'stylex.css',
       useCSSLayers: true,
-      include: [/\.[jt]sx?$/],
-      exclude: [/node_modules/],
     }),
     react({
+      exclude: /\.css$/,
       babel: {
         plugins: [
           [
