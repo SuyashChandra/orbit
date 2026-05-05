@@ -4,18 +4,17 @@ WORKDIR /app
 
 RUN corepack enable && corepack prepare pnpm@latest --activate
 
-# Copy workspace manifests first for layer caching
 COPY package.json pnpm-workspace.yaml pnpm-lock.yaml* turbo.json ./
 COPY packages/shared/package.json ./packages/shared/
 COPY apps/api/package.json ./apps/api/
 
 RUN pnpm install --frozen-lockfile
 
-# Copy source
 COPY tsconfig.base.json ./
 COPY packages/shared ./packages/shared
 COPY apps/api ./apps/api
 
+# tsup bundles @orbit/shared source directly into the output — no shared/dist needed
 RUN pnpm --filter @orbit/api build
 
 # ── Production stage ───────────────────────────────────────────────────────────
@@ -33,7 +32,6 @@ COPY apps/api/package.json ./apps/api/
 RUN pnpm install --frozen-lockfile --prod
 
 COPY --from=builder /app/apps/api/dist ./apps/api/dist
-COPY --from=builder /app/packages/shared/dist ./packages/shared/dist
 
 EXPOSE 3000
 
