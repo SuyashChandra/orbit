@@ -1,0 +1,36 @@
+{
+  "name": "@orbit/web",
+  "version": "0.0.1",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "lint": "eslint src",
+    "typecheck": "tsc --noEmit && tsc --noEmit -p tsconfig.node.json"
+  },
+  "dependencies": {
+    "@orbit/shared": "workspace:*",
+    "react": "^19.1.0",
+    "react-dom": "^19.1.0",
+    "react-router": "^7.5.3",
+    "@tanstack/react-query": "^5.74.4",
+    "@tanstack/react-query-devtools": "^5.74.4",
+    "zustand": "^5.0.4",
+    "@stylexjs/stylex": "^0.10.1",
+    "axios": "^1.9.0"
+  },
+  "devDependencies": {
+    "@orbit/shared": "workspace:*",
+    "@types/node": "^22.15.3",
+    "@types/react": "^19.1.3",
+    "@types/react-dom": "^19.1.3",
+    "@vitejs/plugin-react": "^4.4.1",
+    "@stylexjs/babel-plugin": "^0.10.1",
+    "@stylexjs/rollup-plugin": "^0.10.1",
+    "vite": "^6.3.4",
+    "vite-plugin-pwa": "^0.21.1",
+    "typescript": "^5.8.3"
+  }
+}

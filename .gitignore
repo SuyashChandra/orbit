@@ -1,0 +1,48 @@
+#secrets
+apps/api/gcp-sa-key.json
+
+# Dependencies
+node_modules/
+.pnpm-store/
+
+# Build outputs
+dist/
+build/
+.next/
+out/
+
+# Turbo
+.turbo/
+
+# Environment
+.env
+.env.local
+.env.*.local
+
+# Docker
+.docker-volumes/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/settings.json
+.idea/
+
+# Logs
+*.log
+npm-debug.log*
+pnpm-debug.log*
+
+# TypeScript
+*.tsbuildinfo
+dist-types/
+dist-types-node/
+
+# Claude Code
+.claude/settings.local.json
+CLAUDE.md
+
+#Github workflows
+.github/workflows

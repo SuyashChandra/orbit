@@ -1,0 +1,21 @@
+export declare const FRIEND_CODE_LENGTH = 6;
+export declare const FRIEND_CODE_ALPHABET = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+export declare const JOB_FOLLOW_UP_DAYS: readonly [1, 3, 5];
+export declare const MAX_POST_IMAGES = 4;
+export declare const MAX_RESUME_SIZE_MB = 10;
+export declare const MAX_IMAGE_SIZE_MB = 5;
+export declare const REACTION_TYPES: readonly ["like", "fire", "strong"];
+export type ReactionType = (typeof REACTION_TYPES)[number];
+export declare const FRIEND_STATUS: readonly ["pending", "accepted", "declined"];
+export type FriendStatus = (typeof FRIEND_STATUS)[number];
+export declare const GAME_STATUS: readonly ["upcoming", "ongoing", "completed", "cancelled"];
+export type GameStatus = (typeof GAME_STATUS)[number];
+export declare const PARTICIPANT_STATUS: readonly ["invited", "accepted", "declined"];
+export type ParticipantStatus = (typeof PARTICIPANT_STATUS)[number];
+export declare const JOB_STATUS: readonly ["applied", "screening", "interviewing", "offer", "rejected", "withdrawn"];
+export type JobStatus = (typeof JOB_STATUS)[number];
+export declare const NOTIFICATION_CHANNEL: readonly ["push", "email"];
+export type NotificationChannel = (typeof NOTIFICATION_CHANNEL)[number];
+export declare const NOTIFICATION_TYPE: readonly ["job_followup_1d", "job_followup_3d", "job_followup_5d", "game_invite", "friend_request"];
+export type NotificationType = (typeof NOTIFICATION_TYPE)[number];
+//# sourceMappingURL=constants.d.ts.map

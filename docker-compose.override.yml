@@ -1,0 +1,31 @@
+# Local development overrides — hot reload, no production builds needed
+services:
+  api:
+    build: {}  # skip — use host runner in dev
+    image: ""
+    command: ""
+    entrypoint: ""
+    volumes:
+      - .:/app
+      - /app/node_modules
+      - /app/apps/api/node_modules
+    working_dir: /app
+    command: pnpm --filter @orbit/api dev
+    environment:
+      NODE_ENV: development
+    ports:
+      - "3000:3000"
+
+  web:
+    build: {}
+    image: ""
+    command: ""
+    entrypoint: ""
+    volumes:
+      - .:/app
+      - /app/node_modules
+      - /app/apps/web/node_modules
+    working_dir: /app
+    command: pnpm --filter @orbit/web dev
+    ports:
+      - "5173:5173"
