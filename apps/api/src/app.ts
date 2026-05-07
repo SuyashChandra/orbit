@@ -18,6 +18,7 @@ import { gameRoutes } from './routes/games.js';
 import { exerciseRoutes } from './routes/exercises.js';
 import { workoutRoutes } from './routes/workouts.js';
 import { logRoutes } from './routes/logs.js';
+import { feedRoutes } from './routes/feed.js';
 import { startCron } from './lib/cron.js';
 
 const app = Fastify({
@@ -57,6 +58,7 @@ await app.register(gameRoutes);
 await app.register(exerciseRoutes);
 await app.register(workoutRoutes);
 await app.register(logRoutes);
+await app.register(feedRoutes);
 
 const start = async () => {
   try {
