@@ -234,7 +234,7 @@ const styles = stylex.create({
     height: '40px',
     borderRadius: radii.full,
     backgroundColor: colors.accent,
-    color: '#fff',
+    color: colors.fgOnAccent,
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
@@ -318,7 +318,7 @@ const styles = stylex.create({
   reactionBtnActive: {
     backgroundColor: colors.accent,
     borderColor: colors.accent,
-    color: '#fff',
+    color: colors.fgOnAccent,
   },
   commentToggle: {
     background: 'none',
@@ -367,7 +367,7 @@ const styles = stylex.create({
   commentSubmit: {
     padding: `${spacing.s2} ${spacing.s3}`,
     backgroundColor: colors.accent,
-    color: '#fff',
+    color: colors.fgOnAccent,
     border: 'none',
     borderRadius: radii.md,
     fontSize: font.sm,

@@ -228,7 +228,7 @@ const styles = stylex.create({
   addBtn: {
     padding: `${spacing.s2} ${spacing.s4}`,
     backgroundColor: colors.accent,
-    color: '#fff',
+    color: colors.fgOnAccent,
     border: 'none',
     borderRadius: radii.md,
     fontSize: font.md,
@@ -252,7 +252,7 @@ const styles = stylex.create({
   tabActive: { color: colors.accent, borderBottomColor: colors.accent },
   tabCount: {
     backgroundColor: colors.accent,
-    color: '#fff',
+    color: colors.fgOnAccent,
     borderRadius: radii.full,
     fontSize: font.xs,
     fontWeight: 700,
@@ -322,7 +322,7 @@ const styles = stylex.create({
   textarea: { resize: 'vertical', fontFamily: 'inherit' },
   submitBtn: {
     padding: `${spacing.s3} ${spacing.s4}`, backgroundColor: colors.accent,
-    color: '#fff', border: 'none', borderRadius: radii.md,
+    color: colors.fgOnAccent, border: 'none', borderRadius: radii.md,
     fontSize: font.md, fontWeight: 600, cursor: 'pointer', width: '100%',
   },
 });

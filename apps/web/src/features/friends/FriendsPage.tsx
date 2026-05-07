@@ -200,7 +200,7 @@ const styles = stylex.create({
   addBtn: {
     padding: `${spacing.s2} ${spacing.s4}`,
     backgroundColor: colors.accent,
-    color: '#fff',
+    color: colors.fgOnAccent,
     border: 'none',
     borderRadius: radii.md,
     fontSize: font.md,
@@ -285,7 +285,7 @@ const styles = stylex.create({
     height: '40px',
     borderRadius: radii.full,
     backgroundColor: colors.accent,
-    color: '#fff',
+    color: colors.fgOnAccent,
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
@@ -307,7 +307,7 @@ const styles = stylex.create({
   acceptBtn: {
     padding: `${spacing.s1} ${spacing.s3}`,
     backgroundColor: colors.success,
-    color: '#fff',
+    color: colors.fgOnAccent,
     border: 'none',
     borderRadius: radii.md,
     fontSize: font.sm,

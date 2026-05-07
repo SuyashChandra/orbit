@@ -110,7 +110,7 @@ const styles = stylex.create({
     top: '-2px',
     right: '-4px',
     backgroundColor: colors.danger,
-    color: '#fff',
+    color: colors.fgOnAccent,
     fontSize: '10px',
     fontWeight: 700,
     borderRadius: radii.full,

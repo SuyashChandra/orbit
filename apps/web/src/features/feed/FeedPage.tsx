@@ -178,7 +178,7 @@ const styles = stylex.create({
   emptyBtn: {
     padding: `${spacing.s3} ${spacing.s6}`,
     backgroundColor: colors.accent,
-    color: '#fff',
+    color: colors.fgOnAccent,
     border: 'none',
     borderRadius: radii.full,
     fontSize: font.md,

@@ -295,7 +295,7 @@ const styles = stylex.create({
     height: '20px',
     borderRadius: radii.full,
     backgroundColor: colors.danger,
-    color: '#fff',
+    color: colors.fgOnAccent,
     border: 'none',
     fontSize: '10px',
     cursor: 'pointer',
@@ -370,7 +370,7 @@ const styles = stylex.create({
   postBtn: {
     padding: `${spacing.s2} ${spacing.s5}`,
     backgroundColor: colors.accent,
-    color: '#fff',
+    color: colors.fgOnAccent,
     border: 'none',
     borderRadius: radii.full,
     fontSize: font.md,

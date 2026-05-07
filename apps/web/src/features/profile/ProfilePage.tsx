@@ -120,7 +120,7 @@ const styles = stylex.create({
     height: '88px',
     borderRadius: radii.full,
     backgroundColor: colors.accent,
-    color: '#fff',
+    color: colors.fgOnAccent,
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
@@ -211,7 +211,7 @@ const styles = stylex.create({
   },
   btnAccent: {
     backgroundColor: colors.accent,
-    color: '#fff',
+    color: colors.fgOnAccent,
   },
   btnGhost: {
     backgroundColor: colors.surface,

@@ -7,6 +7,7 @@ export const colors = stylex.defineVars({
   border: 'var(--color-border)',
   textPrimary: 'var(--color-text-primary)',
   textSecondary: 'var(--color-text-secondary)',
+  fgOnAccent: 'var(--color-fg-on-accent)',
   accent: 'var(--color-accent)',
   accentHover: 'var(--color-accent-hover)',
   danger: 'var(--color-danger)',

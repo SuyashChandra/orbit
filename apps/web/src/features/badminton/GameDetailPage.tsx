@@ -299,7 +299,7 @@ const styles = stylex.create({
   respondBtns: { display: 'flex', gap: spacing.s2 },
   acceptBtn: {
     flex: 1, padding: spacing.s3, backgroundColor: '#10b981',
-    color: '#fff', border: 'none', borderRadius: radii.md,
+    color: colors.fgOnAccent, border: 'none', borderRadius: radii.md,
     fontSize: font.md, fontWeight: 600, cursor: 'pointer',
   },
   declineBtn: {
@@ -326,7 +326,7 @@ const styles = stylex.create({
   avatar: { width: '36px', height: '36px', borderRadius: radii.full, objectFit: 'cover', flexShrink: 0 },
   avatarFallback: {
     width: '36px', height: '36px', borderRadius: radii.full,
-    backgroundColor: colors.accent, color: '#fff',
+    backgroundColor: colors.accent, color: colors.fgOnAccent,
     display: 'flex', alignItems: 'center', justifyContent: 'center',
     fontSize: font.sm, fontWeight: 700, flexShrink: 0,
   },

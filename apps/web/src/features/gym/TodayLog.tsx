@@ -335,7 +335,7 @@ const styles = stylex.create({
   startBtn: {
     padding: `${spacing.s3} ${spacing.s4}`,
     backgroundColor: colors.accent,
-    color: '#fff',
+    color: colors.fgOnAccent,
     border: 'none',
     borderRadius: radii.md,
     fontSize: font.md,
@@ -388,7 +388,7 @@ const styles = stylex.create({
   logSetBtn: {
     padding: `${spacing.s2} ${spacing.s3}`,
     backgroundColor: colors.accent,
-    color: '#fff',
+    color: colors.fgOnAccent,
     border: 'none',
     borderRadius: radii.md,
     fontSize: font.sm,

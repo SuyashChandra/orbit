@@ -178,7 +178,7 @@ const styles = stylex.create({
   avatar: { width: '32px', height: '32px', borderRadius: radii.full, objectFit: 'cover', flexShrink: 0 },
   avatarFallback: {
     width: '32px', height: '32px', borderRadius: radii.full,
-    backgroundColor: colors.accent, color: '#fff',
+    backgroundColor: colors.accent, color: colors.fgOnAccent,
     display: 'flex', alignItems: 'center', justifyContent: 'center',
     fontSize: font.sm, fontWeight: 700, flexShrink: 0,
   },

@@ -246,7 +246,7 @@ const styles = stylex.create({
   addBtn: {
     padding: `${spacing.s2} ${spacing.s4}`,
     backgroundColor: colors.accent,
-    color: '#fff',
+    color: colors.fgOnAccent,
     border: 'none',
     borderRadius: radii.md,
     fontSize: font.md,
@@ -279,7 +279,7 @@ const styles = stylex.create({
   filterBtnActive: {
     backgroundColor: colors.accent,
     borderColor: colors.accent,
-    color: '#fff',
+    color: colors.fgOnAccent,
   },
   list: { display: 'flex', flexDirection: 'column', gap: spacing.s3 },
   muted: { color: colors.textSecondary, fontSize: font.sm, textAlign: 'center', paddingTop: spacing.s8 },
@@ -355,7 +355,7 @@ const styles = stylex.create({
   submitBtn: {
     padding: `${spacing.s3} ${spacing.s4}`,
     backgroundColor: colors.accent,
-    color: '#fff',
+    color: colors.fgOnAccent,
     border: 'none',
     borderRadius: radii.md,
     fontSize: font.md,

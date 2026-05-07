@@ -247,7 +247,7 @@ const styles = stylex.create({
     cursor: 'pointer',
     whiteSpace: 'nowrap',
   },
-  chipActive: { backgroundColor: colors.accent, borderColor: colors.accent, color: '#fff' },
+  chipActive: { backgroundColor: colors.accent, borderColor: colors.accent, color: colors.fgOnAccent },
   customRow: { display: 'flex', justifyContent: 'flex-end' },
   customBtn: {
     padding: `${spacing.s1} ${spacing.s3}`,
@@ -367,7 +367,7 @@ const styles = stylex.create({
   submitBtn: {
     padding: `${spacing.s3} ${spacing.s4}`,
     backgroundColor: colors.accent,
-    color: '#fff',
+    color: colors.fgOnAccent,
     border: 'none',
     borderRadius: radii.md,
     fontSize: font.md,

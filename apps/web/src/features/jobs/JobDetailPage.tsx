@@ -346,7 +346,7 @@ const styles = stylex.create({
   saveBtn: {
     padding: `${spacing.s1} ${spacing.s3}`,
     backgroundColor: colors.accent,
-    color: '#fff',
+    color: colors.fgOnAccent,
     border: 'none',
     borderRadius: radii.md,
     fontSize: font.sm,
