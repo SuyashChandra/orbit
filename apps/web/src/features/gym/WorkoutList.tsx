@@ -3,7 +3,7 @@ import * as stylex from '@stylexjs/stylex';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { api } from '../../lib/api.js';
 import { colors, font, radii, spacing } from '../../styles/tokens.stylex.js';
-import type { ExerciseDTO, WorkoutDTO } from '@orbit/shared';
+import type { WorkoutDTO } from '@orbit/shared';
 import { WorkoutBuilder } from './WorkoutBuilder.js';
 
 export function WorkoutList() {

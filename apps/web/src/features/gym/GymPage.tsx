@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import * as stylex from '@stylexjs/stylex';
-import { colors, font, radii, spacing } from '../../styles/tokens.stylex.js';
+import { colors, font, spacing } from '../../styles/tokens.stylex.js';
 import { TodayLog } from './TodayLog.js';
 import { WorkoutList } from './WorkoutList.js';
 import { ExerciseBrowser } from './ExerciseBrowser.js';

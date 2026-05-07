@@ -1,9 +1,9 @@
 import type { FastifyInstance } from 'fastify';
-import { and, asc, desc, eq } from 'drizzle-orm';
+import { and, asc, eq } from 'drizzle-orm';
 import { z } from 'zod';
 import { nanoid } from 'nanoid';
 import { db } from '../db/client.js';
-import { workoutLogs, workoutLogSets, workouts, exercises } from '../db/schema.js';
+import { workoutLogs, workoutLogSets, workouts } from '../db/schema.js';
 import type { WorkoutLogDTO } from '@orbit/shared';
 
 async function buildLogDTO(log: typeof workoutLogs.$inferSelect): Promise<WorkoutLogDTO> {

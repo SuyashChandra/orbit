@@ -5,7 +5,7 @@ import { nanoid } from 'nanoid';
 import { db } from '../db/client.js';
 import { jobApplications, applicationResumes, resumes } from '../db/schema.js';
 import { scheduleJobFollowUps } from '../lib/scheduler.js';
-import type { CreateJobBody, JobApplicationDTO, UpdateJobBody } from '@orbit/shared';
+import type { JobApplicationDTO, UpdateJobBody } from '@orbit/shared';
 import { JOB_STATUS } from '@orbit/shared';
 
 const createSchema = z.object({

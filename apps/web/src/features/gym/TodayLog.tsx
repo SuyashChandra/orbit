@@ -271,7 +271,6 @@ function ExerciseLogCard({
 function AdHocExerciseAdder({ logId, onAdded }: { logId: string; onAdded: () => void }) {
   const [show, setShow] = useState(false);
   const [search, setSearch] = useState('');
-  const qc = useQueryClient();
 
   const exercisesQ = useQuery<{ exercises: ExerciseDTO[] }>({
     queryKey: ['exercises', search],
