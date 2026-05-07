@@ -11,6 +11,10 @@ import authPlugin from './plugins/auth.js';
 import { authRoutes } from './routes/auth.js';
 import { userRoutes } from './routes/users.js';
 import { friendRoutes } from './routes/friends.js';
+import { jobRoutes } from './routes/jobs.js';
+import { resumeRoutes } from './routes/resumes.js';
+import { notificationRoutes } from './routes/notifications.js';
+import { startCron } from './lib/cron.js';
 
 const app = Fastify({
   logger:
@@ -42,10 +46,14 @@ app.get('/health', async () => ({ status: 'ok', timestamp: new Date().toISOStrin
 await app.register(authRoutes);
 await app.register(userRoutes);
 await app.register(friendRoutes);
+await app.register(jobRoutes);
+await app.register(resumeRoutes);
+await app.register(notificationRoutes);
 
 const start = async () => {
   try {
     await app.listen({ port: env.PORT, host: '0.0.0.0' });
+    if (env.NODE_ENV === 'production') startCron();
   } catch (err) {
     app.log.error(err);
     process.exit(1);
