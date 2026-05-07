@@ -3,8 +3,13 @@ import react from '@vitejs/plugin-react';
 import styleX from '@stylexjs/rollup-plugin';
 import { VitePWA } from 'vite-plugin-pwa';
 
+const isDev = process.env['NODE_ENV'] !== 'production';
+
 export default defineConfig({
   plugins: [
+    // The rollup plugin collects extracted styles into stylex.css at build time.
+    // In dev mode Vite never calls generateBundle, so it produces nothing —
+    // runtimeInjection handles dev instead (see babel plugin config below).
     styleX({
       fileName: 'stylex.css',
       useCSSLayers: true,
@@ -16,8 +21,10 @@ export default defineConfig({
           [
             '@stylexjs/babel-plugin',
             {
-              dev: process.env['NODE_ENV'] === 'development',
-              runtimeInjection: false,
+              dev: isDev,
+              // In dev: inject styles into <style> tags at runtime (no CSS file needed).
+              // In prod: set false so the rollup plugin extracts them into stylex.css.
+              runtimeInjection: isDev,
               genConditionalClasses: true,
               treeshakeCompensation: true,
               unstable_moduleResolution: {
@@ -36,8 +43,8 @@ export default defineConfig({
         name: 'Orbit',
         short_name: 'Orbit',
         description: 'Your personal superapp — jobs, gym, badminton, and friends',
-        theme_color: '#0f0f0f',
-        background_color: '#0f0f0f',
+        theme_color: '#001510',
+        background_color: '#001510',
         display: 'standalone',
         orientation: 'portrait',
         scope: '/',
