@@ -6,6 +6,11 @@ import cookie from '@fastify/cookie';
 import multipart from '@fastify/multipart';
 import rateLimit from '@fastify/rate-limit';
 import { env } from './lib/env.js';
+import jwtPlugin from './plugins/jwt.js';
+import authPlugin from './plugins/auth.js';
+import { authRoutes } from './routes/auth.js';
+import { userRoutes } from './routes/users.js';
+import { friendRoutes } from './routes/friends.js';
 
 const app = Fastify({
   logger:
@@ -22,15 +27,21 @@ await app.register(cors, {
 });
 await app.register(cookie);
 await app.register(multipart, {
-  limits: { fileSize: 10 * 1024 * 1024 }, // 10 MB
+  limits: { fileSize: 10 * 1024 * 1024 },
 });
 await app.register(rateLimit, {
   max: 100,
   timeWindow: '1 minute',
 });
 
-// Routes registered in Epic 1+
+await app.register(jwtPlugin);
+await app.register(authPlugin);
+
 app.get('/health', async () => ({ status: 'ok', timestamp: new Date().toISOString() }));
+
+await app.register(authRoutes);
+await app.register(userRoutes);
+await app.register(friendRoutes);
 
 const start = async () => {
   try {
