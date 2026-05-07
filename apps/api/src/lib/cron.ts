@@ -1,7 +1,7 @@
 import cron from 'node-cron';
 import { and, eq, isNull, lte } from 'drizzle-orm';
 import { db } from '../db/client.js';
-import { notifications, jobApplications } from '../db/schema.js';
+import { notifications } from '../db/schema.js';
 import { sendPushToUser } from './push.js';
 import { env } from './env.js';
 

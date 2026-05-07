@@ -14,6 +14,9 @@ import { friendRoutes } from './routes/friends.js';
 import { jobRoutes } from './routes/jobs.js';
 import { resumeRoutes } from './routes/resumes.js';
 import { notificationRoutes } from './routes/notifications.js';
+import { exerciseRoutes } from './routes/exercises.js';
+import { workoutRoutes } from './routes/workouts.js';
+import { logRoutes } from './routes/logs.js';
 import { startCron } from './lib/cron.js';
 
 const app = Fastify({
@@ -49,6 +52,9 @@ await app.register(friendRoutes);
 await app.register(jobRoutes);
 await app.register(resumeRoutes);
 await app.register(notificationRoutes);
+await app.register(exerciseRoutes);
+await app.register(workoutRoutes);
+await app.register(logRoutes);
 
 const start = async () => {
   try {
