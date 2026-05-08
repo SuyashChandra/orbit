@@ -1,19 +1,11 @@
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
-import styleX from '@stylexjs/rollup-plugin';
 import { VitePWA } from 'vite-plugin-pwa';
 
 const isDev = process.env['NODE_ENV'] !== 'production';
 
 export default defineConfig({
   plugins: [
-    // The rollup plugin collects extracted styles into stylex.css at build time.
-    // In dev mode Vite never calls generateBundle, so it produces nothing —
-    // runtimeInjection handles dev instead (see babel plugin config below).
-    styleX({
-      fileName: 'stylex.css',
-      useCSSLayers: true,
-    }),
     react({
       exclude: /\.css$/,
       babel: {
@@ -22,9 +14,10 @@ export default defineConfig({
             '@stylexjs/babel-plugin',
             {
               dev: isDev,
-              // In dev: inject styles into <style> tags at runtime (no CSS file needed).
-              // In prod: set false so the rollup plugin extracts them into stylex.css.
-              runtimeInjection: isDev,
+              // Always inject styles via <style> tags at runtime.
+              // The rollup plugin emits stylex.css but Vite never auto-injects
+              // a <link> for it, so styles silently vanish in production.
+              runtimeInjection: true,
               genConditionalClasses: true,
               treeshakeCompensation: true,
               unstable_moduleResolution: {
