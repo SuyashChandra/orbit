@@ -3,7 +3,7 @@ import react from '@vitejs/plugin-react';
 import styleX from '@stylexjs/rollup-plugin';
 import { VitePWA } from 'vite-plugin-pwa';
 
-const isDev = process.env['NODE_ENV'] !== 'production';
+const isProd = process.env['NODE_ENV'] === 'production';
 
 /**
  * The rollup plugin emits stylex.css as a build asset via emitFile(), but
@@ -38,7 +38,7 @@ export default defineConfig({
     //   dev  (dev:true)  → runtimeInjection defaults to true → <style> tags via JS
     //   prod (dev:false) → runtimeInjection defaults to false → CSS extracted to stylex.css
     {
-      ...styleX({ fileName: 'stylex.css' }),
+      ...styleX({ fileName: 'stylex.css', dev: !isProd }),
       enforce: 'pre',
     },
     stylexLinkInjector(),
