@@ -1,8 +1,6 @@
 import { useRef, useState } from 'react';
-import * as stylex from '@stylexjs/stylex';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { api } from '../../lib/api.js';
-import { colors, font, radii, spacing } from '../../styles/tokens.stylex.js';
 import type { PostDTO, WorkoutLogDTO, BadmintonGameDTO } from '@orbit/shared';
 
 interface Props {
@@ -89,11 +87,15 @@ export function CreatePostModal({ onClose }: Props) {
   const canSubmit = content.trim().length > 0 && !createMutation.isPending;
 
   return (
-    <div {...stylex.props(styles.overlay)} onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}>
-      <div {...stylex.props(styles.modal)}>
-        <div {...stylex.props(styles.header)}>
-          <h3 {...stylex.props(styles.title)}>New Post</h3>
-          <button onClick={onClose} {...stylex.props(styles.closeBtn)}>✕</button>
+    <div
+      className="fixed inset-0 flex items-end justify-center z-[200]"
+      style={{ backgroundColor: 'rgba(0,0,0,0.6)' }}
+      onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}
+    >
+      <div className="w-full max-w-[600px] bg-surface flex flex-col max-h-[90vh] overflow-hidden rounded-t-lg">
+        <div className="flex items-center justify-between py-4 px-4 pb-3 border-b border-border">
+          <h3 className="text-lg font-bold text-fg">New Post</h3>
+          <button onClick={onClose} className="bg-transparent border-none text-fg-muted text-base cursor-pointer p-1">✕</button>
         </div>
 
         <textarea
@@ -101,16 +103,20 @@ export function CreatePostModal({ onClose }: Props) {
           onChange={(e) => setContent(e.target.value)}
           placeholder="What's on your mind?"
           autoFocus
-          {...stylex.props(styles.textarea)}
+          className="p-4 bg-transparent border-none text-fg text-base outline-none resize-none min-h-[120px]"
+          style={{ lineHeight: '1.5' }}
         />
 
         {/* Image previews */}
         {imagePreviews.length > 0 && (
-          <div {...stylex.props(styles.previews)}>
+          <div className="flex gap-2 px-4 pb-2 flex-wrap">
             {imagePreviews.map((src, i) => (
-              <div key={i} {...stylex.props(styles.previewWrap)}>
-                <img src={src} alt="" {...stylex.props(styles.preview)} />
-                <button onClick={() => removeImage(i)} {...stylex.props(styles.removeImg)}>✕</button>
+              <div key={i} className="relative inline-block">
+                <img src={src} alt="" className="w-20 h-20 object-cover rounded-md block" />
+                <button
+                  onClick={() => removeImage(i)}
+                  className="absolute -top-1.5 -right-1.5 w-5 h-5 rounded-full bg-danger text-on-accent border-none text-[10px] cursor-pointer flex items-center justify-center"
+                >✕</button>
               </div>
             ))}
           </div>
@@ -118,28 +124,28 @@ export function CreatePostModal({ onClose }: Props) {
 
         {/* Linked workout */}
         {linkedWorkoutLogId && (
-          <div {...stylex.props(styles.linked)}>
+          <div className="flex items-center gap-2 py-2 px-4 text-sm text-fg-muted">
             🏋️ Workout log linked
-            <button onClick={() => setLinkedWorkoutLogId(null)} {...stylex.props(styles.unlinkBtn)}>✕</button>
+            <button onClick={() => setLinkedWorkoutLogId(null)} className="bg-transparent border-none text-fg-muted text-xs cursor-pointer">✕</button>
           </div>
         )}
 
         {/* Linked game */}
         {linkedGameId && (
-          <div {...stylex.props(styles.linked)}>
+          <div className="flex items-center gap-2 py-2 px-4 text-sm text-fg-muted">
             🏸 Game linked
-            <button onClick={() => setLinkedGameId(null)} {...stylex.props(styles.unlinkBtn)}>✕</button>
+            <button onClick={() => setLinkedGameId(null)} className="bg-transparent border-none text-fg-muted text-xs cursor-pointer">✕</button>
           </div>
         )}
 
         {/* Workout picker */}
         {showWorkoutPicker && (
-          <div {...stylex.props(styles.picker)}>
-            <div {...stylex.props(styles.pickerHeader)}>
-              <span {...stylex.props(styles.pickerTitle)}>Link a workout</span>
-              <button onClick={() => setShowWorkoutPicker(false)} {...stylex.props(styles.closeBtn)}>✕</button>
+          <div className="border-t border-border max-h-[200px] overflow-y-auto py-2 px-4">
+            <div className="flex items-center justify-between mb-2">
+              <span className="text-sm font-bold text-fg">Link a workout</span>
+              <button onClick={() => setShowWorkoutPicker(false)} className="bg-transparent border-none text-fg-muted text-base cursor-pointer p-1">✕</button>
             </div>
-            {workoutLogsQ.isLoading && <p {...stylex.props(styles.muted)}>Loading…</p>}
+            {workoutLogsQ.isLoading && <p className="text-sm text-fg-muted text-center p-3">Loading…</p>}
             {workoutLogsQ.data?.slice(0, 10).map((log) => (
               <button
                 key={log.id}
@@ -148,24 +154,24 @@ export function CreatePostModal({ onClose }: Props) {
                   setLinkedGameId(null);
                   setShowWorkoutPicker(false);
                 }}
-                {...stylex.props(styles.pickerItem)}
+                className="block w-full text-left py-2 px-3 bg-transparent border border-border rounded-md text-fg text-sm cursor-pointer mb-1"
               >
                 {new Date(log.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
-                {log.workout && <span {...stylex.props(styles.pickerSub)}> · {log.workout.name}</span>}
+                {log.workout && <span className="text-fg-muted"> · {log.workout.name}</span>}
               </button>
             ))}
-            {workoutLogsQ.data?.length === 0 && <p {...stylex.props(styles.muted)}>No logs yet</p>}
+            {workoutLogsQ.data?.length === 0 && <p className="text-sm text-fg-muted text-center p-3">No logs yet</p>}
           </div>
         )}
 
         {/* Game picker */}
         {showGamePicker && (
-          <div {...stylex.props(styles.picker)}>
-            <div {...stylex.props(styles.pickerHeader)}>
-              <span {...stylex.props(styles.pickerTitle)}>Link a game</span>
-              <button onClick={() => setShowGamePicker(false)} {...stylex.props(styles.closeBtn)}>✕</button>
+          <div className="border-t border-border max-h-[200px] overflow-y-auto py-2 px-4">
+            <div className="flex items-center justify-between mb-2">
+              <span className="text-sm font-bold text-fg">Link a game</span>
+              <button onClick={() => setShowGamePicker(false)} className="bg-transparent border-none text-fg-muted text-base cursor-pointer p-1">✕</button>
             </div>
-            {gamesQ.isLoading && <p {...stylex.props(styles.muted)}>Loading…</p>}
+            {gamesQ.isLoading && <p className="text-sm text-fg-muted text-center p-3">Loading…</p>}
             {gamesQ.data?.slice(0, 10).map((g) => (
               <button
                 key={g.id}
@@ -174,40 +180,40 @@ export function CreatePostModal({ onClose }: Props) {
                   setLinkedWorkoutLogId(null);
                   setShowGamePicker(false);
                 }}
-                {...stylex.props(styles.pickerItem)}
+                className="block w-full text-left py-2 px-3 bg-transparent border border-border rounded-md text-fg text-sm cursor-pointer mb-1"
               >
                 🏸 {new Date(g.scheduledAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
-                {g.location && <span {...stylex.props(styles.pickerSub)}> · {g.location}</span>}
+                {g.location && <span className="text-fg-muted"> · {g.location}</span>}
               </button>
             ))}
-            {gamesQ.data?.length === 0 && <p {...stylex.props(styles.muted)}>No games yet</p>}
+            {gamesQ.data?.length === 0 && <p className="text-sm text-fg-muted text-center p-3">No games yet</p>}
           </div>
         )}
 
         {/* Toolbar */}
-        <div {...stylex.props(styles.toolbar)}>
-          <div {...stylex.props(styles.toolbarLeft)}>
+        <div className="flex items-center justify-between py-3 px-4 border-t border-border">
+          <div className="flex gap-2">
             <button
               onClick={() => fileRef.current?.click()}
               disabled={images.length >= 4}
-              {...stylex.props(styles.toolBtn)}
+              className="bg-transparent border border-border rounded-md py-2 px-3 text-base cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed"
               title="Add photo"
             >📷</button>
             <button
               onClick={() => { setShowWorkoutPicker((v) => !v); setShowGamePicker(false); }}
-              {...stylex.props(styles.toolBtn, !!linkedWorkoutLogId && styles.toolBtnActive)}
+              className={`border rounded-md py-2 px-3 text-base cursor-pointer ${linkedWorkoutLogId ? 'bg-accent border-accent' : 'bg-transparent border-border'}`}
               title="Link workout"
             >🏋️</button>
             <button
               onClick={() => { setShowGamePicker((v) => !v); setShowWorkoutPicker(false); }}
-              {...stylex.props(styles.toolBtn, !!linkedGameId && styles.toolBtnActive)}
+              className={`border rounded-md py-2 px-3 text-base cursor-pointer ${linkedGameId ? 'bg-accent border-accent' : 'bg-transparent border-border'}`}
               title="Link game"
             >🏸</button>
           </div>
           <button
             onClick={() => createMutation.mutate()}
             disabled={!canSubmit}
-            {...stylex.props(styles.postBtn)}
+            className="py-2 px-5 bg-accent text-on-accent border-none rounded-full text-base font-bold cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {createMutation.isPending ? 'Posting…' : 'Post'}
           </button>
@@ -225,157 +231,3 @@ export function CreatePostModal({ onClose }: Props) {
     </div>
   );
 }
-
-const styles = stylex.create({
-  overlay: {
-    position: 'fixed',
-    inset: 0,
-    backgroundColor: 'rgba(0,0,0,0.6)',
-    display: 'flex',
-    alignItems: 'flex-end',
-    justifyContent: 'center',
-    zIndex: 200,
-  },
-  modal: {
-    width: '100%',
-    maxWidth: '600px',
-    backgroundColor: colors.surface,
-    borderRadius: `${radii.lg} ${radii.lg} 0 0`,
-    display: 'flex',
-    flexDirection: 'column',
-    maxHeight: '90vh',
-    overflow: 'hidden',
-  },
-  header: {
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    padding: `${spacing.s4} ${spacing.s4} ${spacing.s3}`,
-    borderBottom: `1px solid ${colors.border}`,
-  },
-  title: { fontSize: font.lg, fontWeight: 700, color: colors.textPrimary },
-  closeBtn: {
-    background: 'none',
-    border: 'none',
-    color: colors.textSecondary,
-    fontSize: font.md,
-    cursor: 'pointer',
-    padding: spacing.s1,
-  },
-  textarea: {
-    padding: spacing.s4,
-    backgroundColor: 'transparent',
-    border: 'none',
-    color: colors.textPrimary,
-    fontSize: font.md,
-    resize: 'none',
-    minHeight: '120px',
-    outline: 'none',
-    lineHeight: '1.5',
-  },
-  previews: {
-    display: 'flex',
-    gap: spacing.s2,
-    padding: `0 ${spacing.s4} ${spacing.s2}`,
-    flexWrap: 'wrap',
-  },
-  previewWrap: { position: 'relative', display: 'inline-block' },
-  preview: {
-    width: '80px',
-    height: '80px',
-    objectFit: 'cover',
-    borderRadius: radii.md,
-    display: 'block',
-  },
-  removeImg: {
-    position: 'absolute',
-    top: '-6px',
-    right: '-6px',
-    width: '20px',
-    height: '20px',
-    borderRadius: radii.full,
-    backgroundColor: colors.danger,
-    color: colors.fgOnAccent,
-    border: 'none',
-    fontSize: '10px',
-    cursor: 'pointer',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  linked: {
-    display: 'flex',
-    alignItems: 'center',
-    gap: spacing.s2,
-    padding: `${spacing.s2} ${spacing.s4}`,
-    fontSize: font.sm,
-    color: colors.textSecondary,
-  },
-  unlinkBtn: {
-    background: 'none',
-    border: 'none',
-    color: colors.textSecondary,
-    fontSize: font.xs,
-    cursor: 'pointer',
-  },
-  picker: {
-    borderTop: `1px solid ${colors.border}`,
-    maxHeight: '200px',
-    overflowY: 'auto',
-    padding: `${spacing.s2} ${spacing.s4}`,
-  },
-  pickerHeader: {
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    marginBottom: spacing.s2,
-  },
-  pickerTitle: { fontSize: font.sm, fontWeight: 700, color: colors.textPrimary },
-  pickerItem: {
-    display: 'block',
-    width: '100%',
-    textAlign: 'left',
-    padding: `${spacing.s2} ${spacing.s3}`,
-    background: 'none',
-    border: `1px solid ${colors.border}`,
-    borderRadius: radii.md,
-    color: colors.textPrimary,
-    fontSize: font.sm,
-    cursor: 'pointer',
-    marginBottom: spacing.s1,
-  },
-  pickerSub: { color: colors.textSecondary },
-  muted: { fontSize: font.sm, color: colors.textSecondary, textAlign: 'center', padding: spacing.s3 },
-  toolbar: {
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    padding: `${spacing.s3} ${spacing.s4}`,
-    borderTop: `1px solid ${colors.border}`,
-  },
-  toolbarLeft: { display: 'flex', gap: spacing.s2 },
-  toolBtn: {
-    background: 'none',
-    border: `1px solid ${colors.border}`,
-    borderRadius: radii.md,
-    padding: `${spacing.s2} ${spacing.s3}`,
-    fontSize: font.md,
-    cursor: 'pointer',
-    ':disabled': { opacity: 0.4, cursor: 'not-allowed' },
-  },
-  toolBtnActive: {
-    backgroundColor: colors.accent,
-    borderColor: colors.accent,
-  },
-  postBtn: {
-    padding: `${spacing.s2} ${spacing.s5}`,
-    backgroundColor: colors.accent,
-    color: colors.fgOnAccent,
-    border: 'none',
-    borderRadius: radii.full,
-    fontSize: font.md,
-    fontWeight: 700,
-    cursor: 'pointer',
-    ':disabled': { opacity: 0.5, cursor: 'not-allowed' },
-  },
-});

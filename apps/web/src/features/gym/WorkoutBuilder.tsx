@@ -1,8 +1,6 @@
 import { useState } from 'react';
-import * as stylex from '@stylexjs/stylex';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { api } from '../../lib/api.js';
-import { colors, font, radii, spacing } from '../../styles/tokens.stylex.js';
 import type { ExerciseDTO, WorkoutDTO } from '@orbit/shared';
 
 interface ExercisesResponse { exercises: ExerciseDTO[]; }
@@ -76,30 +74,38 @@ export function WorkoutBuilder({ workout, onBack }: { workout: WorkoutDTO; onBac
   const existingIds = new Set(current.exercises.map((e) => e.exercise.id));
 
   return (
-    <div {...stylex.props(styles.container)}>
-      <div {...stylex.props(styles.header)}>
-        <button onClick={onBack} {...stylex.props(styles.backBtn)}>← Back</button>
-        <h3 {...stylex.props(styles.title)}>{current.name}</h3>
+    <div className="flex flex-col gap-4">
+      <div className="flex items-center gap-3">
+        <button onClick={onBack} className="bg-transparent border-none text-accent text-base cursor-pointer p-0">← Back</button>
+        <h3 className="text-lg font-bold text-fg">{current.name}</h3>
       </div>
 
       {sorted.length === 0 && (
-        <p {...stylex.props(styles.muted)}>No exercises yet. Add some below.</p>
+        <p className="text-fg-muted text-sm text-center pt-4">No exercises yet. Add some below.</p>
       )}
 
-      <div {...stylex.props(styles.list)}>
+      <div className="flex flex-col gap-2">
         {sorted.map((we, idx) => (
-          <div key={we.id} {...stylex.props(styles.exRow)}>
-            <div {...stylex.props(styles.reorderBtns)}>
-              <button onClick={() => moveUp(idx)} disabled={idx === 0} {...stylex.props(styles.reorderBtn)}>▲</button>
-              <button onClick={() => moveDown(idx)} disabled={idx === sorted.length - 1} {...stylex.props(styles.reorderBtn)}>▼</button>
+          <div key={we.id} className="flex items-center gap-2 py-3 px-3 bg-surface border border-border rounded-md">
+            <div className="flex flex-col gap-0.5">
+              <button
+                onClick={() => moveUp(idx)}
+                disabled={idx === 0}
+                className="bg-transparent border-none text-fg-muted text-[10px] cursor-pointer p-0.5 leading-none disabled:opacity-30"
+              >▲</button>
+              <button
+                onClick={() => moveDown(idx)}
+                disabled={idx === sorted.length - 1}
+                className="bg-transparent border-none text-fg-muted text-[10px] cursor-pointer p-0.5 leading-none disabled:opacity-30"
+              >▼</button>
             </div>
-            <div {...stylex.props(styles.exInfo)}>
-              <p {...stylex.props(styles.exName)}>{we.exercise.name}</p>
-              <p {...stylex.props(styles.exMeta)}>{we.exercise.category}</p>
+            <div className="flex-1">
+              <p className="text-base font-semibold text-fg">{we.exercise.name}</p>
+              <p className="text-xs text-fg-muted">{we.exercise.category}</p>
             </div>
             <button
               onClick={() => removeMutation.mutate(we.exercise.id)}
-              {...stylex.props(styles.removeBtn)}
+              className="bg-transparent border-none text-fg-muted cursor-pointer text-base p-1"
             >
               ✕
             </button>
@@ -107,26 +113,40 @@ export function WorkoutBuilder({ workout, onBack }: { workout: WorkoutDTO; onBac
         ))}
       </div>
 
-      <button onClick={() => setShowPicker(true)} {...stylex.props(styles.addBtn)}>
+      <button
+        onClick={() => setShowPicker(true)}
+        className="py-3 px-4 bg-transparent border border-dashed border-border rounded-md text-fg-muted text-base cursor-pointer w-full"
+      >
         + Add Exercise
       </button>
 
       {/* Exercise picker */}
       {showPicker && (
-        <div {...stylex.props(styles.overlay)} onClick={() => setShowPicker(false)}>
-          <div {...stylex.props(styles.picker)} onClick={(e) => e.stopPropagation()}>
-            <div {...stylex.props(styles.pickerHeader)}>
+        <div
+          className="fixed inset-0 z-[200] flex items-end"
+          style={{ backgroundColor: 'rgba(0,0,0,0.6)' }}
+          onClick={() => setShowPicker(false)}
+        >
+          <div
+            className="w-full max-w-[480px] mx-auto bg-bg flex flex-col max-h-[75dvh]"
+            style={{ borderRadius: 'var(--radius-lg) var(--radius-lg) 0 0' }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex gap-2 p-4 border-b border-border shrink-0">
               <input
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
                 placeholder="Search exercises…"
                 autoFocus
-                {...stylex.props(styles.searchInput)}
+                className="flex-1 py-2 px-3 bg-surface border border-border rounded-md text-fg text-base"
               />
-              <button onClick={() => setShowPicker(false)} {...stylex.props(styles.closeBtn)}>✕</button>
+              <button
+                onClick={() => setShowPicker(false)}
+                className="bg-transparent border-none text-fg-muted text-lg cursor-pointer"
+              >✕</button>
             </div>
-            <div {...stylex.props(styles.pickerList)}>
-              {exercisesQ.isLoading && <p {...stylex.props(styles.muted)}>Loading…</p>}
+            <div className="overflow-y-auto flex-1 p-2">
+              {exercisesQ.isLoading && <p className="text-fg-muted text-sm text-center pt-4">Loading…</p>}
               {exercisesQ.data?.exercises
                 .filter((e) => !existingIds.has(e.id))
                 .map((ex) => (
@@ -134,10 +154,10 @@ export function WorkoutBuilder({ workout, onBack }: { workout: WorkoutDTO; onBac
                     key={ex.id}
                     onClick={() => addMutation.mutate({ exerciseId: ex.id, orderIndex: sorted.length })}
                     disabled={addMutation.isPending}
-                    {...stylex.props(styles.pickerItem)}
+                    className="block w-full py-3 px-4 bg-transparent border-none border-b border-border text-left cursor-pointer"
                   >
-                    <p {...stylex.props(styles.exName)}>{ex.name}</p>
-                    <p {...stylex.props(styles.exMeta)}>{ex.category}</p>
+                    <p className="text-base font-semibold text-fg">{ex.name}</p>
+                    <p className="text-xs text-fg-muted">{ex.category}</p>
                   </button>
                 ))}
             </div>
@@ -156,92 +176,3 @@ function useDebounce<T>(value: T, delay: number): T {
   });
   return debounced;
 }
-
-const styles = stylex.create({
-  container: { display: 'flex', flexDirection: 'column', gap: spacing.s4 },
-  header: { display: 'flex', alignItems: 'center', gap: spacing.s3 },
-  backBtn: { background: 'none', border: 'none', color: colors.accent, fontSize: font.md, cursor: 'pointer', padding: 0 },
-  title: { fontSize: font.lg, fontWeight: 700, color: colors.textPrimary },
-  muted: { color: colors.textSecondary, fontSize: font.sm, textAlign: 'center', paddingTop: spacing.s4 },
-  list: { display: 'flex', flexDirection: 'column', gap: spacing.s2 },
-  exRow: {
-    display: 'flex',
-    alignItems: 'center',
-    gap: spacing.s2,
-    padding: `${spacing.s3} ${spacing.s3}`,
-    backgroundColor: colors.surface,
-    border: `1px solid ${colors.border}`,
-    borderRadius: radii.md,
-  },
-  reorderBtns: { display: 'flex', flexDirection: 'column', gap: '2px' },
-  reorderBtn: {
-    background: 'none',
-    border: 'none',
-    color: colors.textSecondary,
-    fontSize: '10px',
-    cursor: 'pointer',
-    padding: '2px',
-    lineHeight: 1,
-    ':disabled': { opacity: 0.3 },
-  },
-  exInfo: { flex: 1 },
-  exName: { fontSize: font.md, fontWeight: 600, color: colors.textPrimary },
-  exMeta: { fontSize: font.xs, color: colors.textSecondary },
-  removeBtn: { background: 'none', border: 'none', color: colors.textSecondary, cursor: 'pointer', fontSize: font.md, padding: spacing.s1 },
-  addBtn: {
-    padding: `${spacing.s3} ${spacing.s4}`,
-    backgroundColor: 'transparent',
-    border: `1px dashed ${colors.border}`,
-    borderRadius: radii.md,
-    color: colors.textSecondary,
-    fontSize: font.md,
-    cursor: 'pointer',
-    width: '100%',
-  },
-  overlay: {
-    position: 'fixed',
-    inset: 0,
-    backgroundColor: 'rgba(0,0,0,0.6)',
-    zIndex: 200,
-    display: 'flex',
-    alignItems: 'flex-end',
-  },
-  picker: {
-    width: '100%',
-    maxWidth: '480px',
-    margin: '0 auto',
-    backgroundColor: colors.bg,
-    borderRadius: `${radii.lg} ${radii.lg} 0 0`,
-    display: 'flex',
-    flexDirection: 'column',
-    maxHeight: '75dvh',
-  },
-  pickerHeader: {
-    display: 'flex',
-    gap: spacing.s2,
-    padding: spacing.s4,
-    borderBottom: `1px solid ${colors.border}`,
-    flexShrink: 0,
-  },
-  searchInput: {
-    flex: 1,
-    padding: `${spacing.s2} ${spacing.s3}`,
-    backgroundColor: colors.surface,
-    border: `1px solid ${colors.border}`,
-    borderRadius: radii.md,
-    color: colors.textPrimary,
-    fontSize: font.md,
-  },
-  closeBtn: { background: 'none', border: 'none', color: colors.textSecondary, fontSize: font.lg, cursor: 'pointer' },
-  pickerList: { overflowY: 'auto', flex: 1, padding: spacing.s2 },
-  pickerItem: {
-    display: 'block',
-    width: '100%',
-    padding: `${spacing.s3} ${spacing.s4}`,
-    backgroundColor: 'transparent',
-    border: 'none',
-    borderBottom: `1px solid ${colors.border}`,
-    textAlign: 'left',
-    cursor: 'pointer',
-  },
-});

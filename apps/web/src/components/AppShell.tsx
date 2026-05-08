@@ -1,33 +1,15 @@
-import * as stylex from '@stylexjs/stylex';
 import { Outlet } from 'react-router';
 import { BottomNav } from './BottomNav.js';
 import { TopBar } from './TopBar.js';
 
 export function AppShell() {
   return (
-    <div {...stylex.props(styles.shell)}>
+    <div className="flex flex-col h-full max-w-[480px] mx-auto relative">
       <TopBar />
-      <main {...stylex.props(styles.main)}>
+      <main className="flex-1 overflow-y-auto pt-[var(--nav-height)] pb-[var(--bottom-nav-height)]">
         <Outlet />
       </main>
       <BottomNav />
     </div>
   );
 }
-
-const styles = stylex.create({
-  shell: {
-    display: 'flex',
-    flexDirection: 'column',
-    height: '100%',
-    maxWidth: '480px',
-    margin: '0 auto',
-    position: 'relative',
-  },
-  main: {
-    flex: 1,
-    overflowY: 'auto',
-    paddingTop: 'var(--nav-height)',
-    paddingBottom: 'var(--bottom-nav-height)',
-  },
-});

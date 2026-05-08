@@ -1,96 +1,77 @@
-@import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,ital,wght@9..144,0,500..700;9..144,1,500..700&family=Inter:wght@400;500;600;700&display=swap');
+@import "tailwindcss";
+@import url("https://fonts.googleapis.com/css2?family=Fraunces:opsz,ital,wght@9..144,0,500..700;9..144,1,500..700&family=Inter:wght@400;500;600;700&display=swap");
 
-*,
-*::before,
-*::after {
-  box-sizing: border-box;
-  margin: 0;
-  padding: 0;
-}
+/* ── Design tokens ──────────────────────────────────────────────────────────
+   Defined in @theme so Tailwind generates utilities AND they're available
+   as CSS custom properties throughout the app.
+   ────────────────────────────────────────────────────────────────────────── */
+@theme {
+  /* Backgrounds */
+  --color-bg-outer:   #0c1411;
+  --color-bg:         #14201c;
+  --color-surface:    #1c2a25;
+  --color-surface-2:  #233631;
+  --color-raised:     #2c4239;
 
-:root {
-  /* Cozy palette — warm dark mode, sage teal accent, paper-cream foreground */
+  /* Borders */
+  --color-border:      #2c4239;
+  --color-border-soft: #233631;
 
-  /* Surfaces */
-  --color-bg-outer:        #0c1411;   /* page gutter / outermost */
-  --color-bg:              #14201c;   /* device column / app bg */
-  --color-surface:         #1c2a25;   /* cards, inputs */
-  --color-surface-2:       #233631;   /* raised tiles */
-  --color-surface-raised:  #2c4239;   /* date blocks, hover, unread */
-  --color-border:          #2c4239;
-  --color-border-soft:     #233631;
+  /* Text */
+  --color-fg:        #ecead0;
+  --color-fg-muted:  #a8b09a;
+  --color-fg-dim:    #6f7868;
+  --color-on-accent: #0c1411;
 
-  /* Foreground */
-  --color-text-primary:    #ecead0;   /* warm paper-cream */
-  --color-text-secondary:  #a8b09a;
-  --color-text-deep:       #6f7868;
-  --color-fg-on-accent:    #0c1411;   /* dark text on teal */
+  /* Brand */
+  --color-accent:        #4fb89a;
+  --color-accent-bright: #6ed4b6;
+  --color-accent-soft:   rgba(79, 184, 154, 0.13);
+  --color-danger:        #e08070;
+  --color-warning:       #e3a86a;
+  --color-info:          #8cb8d8;
+  --color-warm:          #e6c79a;
+  --color-success:       #4fb89a;
 
-  /* Accent — softer sage teal */
-  --color-accent:          #4fb89a;
-  --color-accent-bright:   #6ed4b6;
-  --color-accent-hover:    #6ed4b6;
-  --color-accent-soft:     rgba(79, 184, 154, 0.13);
+  /* Typography */
+  --font-sans:    "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  --font-display: "Fraunces", "Inter", Georgia, serif;
+  --font-mono:    ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace;
 
-  /* Semantic — warmer set */
-  --color-danger:          #e08070;
-  --color-warning:         #e3a86a;
-  --color-info:            #8cb8d8;
-  --color-warm:            #e6c79a;
-  --color-success:         #4fb89a;
+  /* Font sizes (override Tailwind defaults to match design) */
+  --text-xs:   0.75rem;    /* 12px */
+  --text-sm:   0.8125rem;  /* 13px */
+  --text-base: 0.9375rem;  /* 15px */
+  --text-lg:   1.125rem;   /* 18px */
+  --text-xl:   1.375rem;   /* 22px */
+  --text-2xl:  1.75rem;    /* 28px */
 
-  /* Spacing scale */
-  --space-1: 4px;
-  --space-2: 8px;
-  --space-3: 12px;
-  --space-4: 16px;
-  --space-5: 20px;
-  --space-6: 24px;
-  --space-8: 32px;
-  --space-10: 40px;
-  --space-12: 48px;
-
-  /* Radii — generous + cozy */
+  /* Border radius */
   --radius-sm:   8px;
   --radius-md:   14px;
   --radius-lg:   22px;
   --radius-full: 9999px;
 
-  /* Elevation */
+  /* Z-index */
+  --z-nav:   100;
+  --z-modal: 200;
+
+  /* Shadows */
   --shadow-dropdown: 0 8px 24px rgba(0, 0, 0, 0.3);
   --shadow-modal:    0 30px 80px rgba(0, 0, 0, 0.45);
-
-  /* Typography */
-  --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto,
-               Helvetica, Arial, sans-serif;
-  --font-display: 'Fraunces', 'Inter', Georgia, serif;
-  --font-mono: ui-monospace, SFMono-Regular, 'SF Mono', Menlo,
-               Consolas, 'Liberation Mono', monospace;
-  --font-size-xs: 12px;
-  --font-size-sm: 13px;
-  --font-size-md: 15px;
-  --font-size-lg: 18px;
-  --font-size-xl: 22px;
-  --font-size-2xl: 28px;
-
-  /* Navbar */
-  --nav-height: 60px;
-  --bottom-nav-height: 72px;
-
-  /* Motion */
-  --transition-fast: 0.15s ease;
 }
 
-html,
-body {
+/* ── Global resets & base styles ─────────────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+html, body {
   height: 100%;
-  background:
-    radial-gradient(1100px 600px at 80% -10%, rgba(28, 42, 37, 0.4), transparent 60%),
-    radial-gradient(900px 500px at 0% 100%, rgba(44, 66, 57, 0.4), transparent 55%),
-    var(--color-bg-outer);
-  color: var(--color-text-primary);
+  background: radial-gradient(1100px 600px at 80% -10%, rgba(28,42,37,.4), transparent 60%),
+              radial-gradient(900px 500px at 0% 100%,  rgba(44,66,57,.4), transparent 55%),
+              var(--color-bg-outer);
+  color: var(--color-fg);
   font-family: var(--font-sans);
-  font-size: var(--font-size-md);
+  font-size: var(--text-base);
   line-height: 1.55;
   -webkit-font-smoothing: antialiased;
   overscroll-behavior: none;
@@ -118,17 +99,6 @@ body {
   }
 }
 
-a {
-  color: inherit;
-  text-decoration: none;
-}
-
-button {
-  cursor: pointer;
-  font-family: inherit;
-}
-
-img {
-  max-width: 100%;
-  display: block;
-}
+a      { color: inherit; text-decoration: none; }
+button { cursor: pointer; font-family: inherit; }
+img    { max-width: 100%; display: block; }

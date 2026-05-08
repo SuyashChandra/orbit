@@ -1,9 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
-import * as stylex from '@stylexjs/stylex';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { api } from '../../lib/api.js';
 import { avatarColor } from '../../lib/avatarColor.js';
-import { colors, font, radii, spacing } from '../../styles/tokens.stylex.js';
 import { useAuthStore } from '../auth/authStore.js';
 import type { PostDTO, CommentDTO } from '@orbit/shared';
 import { REACTION_TYPES } from '@orbit/shared';
@@ -90,15 +88,15 @@ export function PostCard({ post, onDelete }: Props) {
   const totalReactions = post.reactions.reduce((s, r) => s + r.count, 0);
 
   return (
-    <article {...stylex.props(styles.card)}>
+    <article className="bg-surface rounded-lg overflow-hidden py-5 px-5 pb-4">
       {/* Header */}
-      <div {...stylex.props(styles.header)}>
-        <div {...stylex.props(styles.avatarWrap)}>
+      <div className="flex items-center gap-3 mb-3">
+        <div className="shrink-0">
           {post.author.avatar
-            ? <img src={post.author.avatar} alt="" {...stylex.props(styles.avatar)} />
+            ? <img src={post.author.avatar} alt="" className="w-10 h-10 rounded-full object-cover" />
             : (
               <div
-                {...stylex.props(styles.avatarFallback)}
+                className="w-10 h-10 rounded-full text-on-accent flex items-center justify-center text-base font-bold"
                 style={{ backgroundColor: avatarColor(post.author.id) }}
               >
                 {post.author.name[0]?.toUpperCase()}
@@ -106,34 +104,34 @@ export function PostCard({ post, onDelete }: Props) {
             )
           }
         </div>
-        <div {...stylex.props(styles.authorInfo)}>
-          <span {...stylex.props(styles.authorName)}>{post.author.name}</span>
-          <span {...stylex.props(styles.timestamp)}>{timestamp}</span>
+        <div className="flex-1 flex flex-col gap-0.5">
+          <span className="text-base font-semibold text-fg">{post.author.name}</span>
+          <span className="text-xs text-fg-dim">{timestamp}</span>
         </div>
-        <div {...stylex.props(styles.menuWrap)} ref={menuRef}>
+        <div className="relative" ref={menuRef}>
           <button
             onClick={() => setMenuOpen((v) => !v)}
-            {...stylex.props(styles.menuBtn)}
+            className="w-8 h-8 rounded-full bg-transparent border-none text-fg-dim text-lg cursor-pointer flex items-center justify-center transition hover:bg-surface-2"
             aria-label="More"
           >
             ⋯
           </button>
           {menuOpen && (
-            <div {...stylex.props(styles.menu)}>
+            <div className="absolute top-[calc(100%+4px)] right-0 bg-surface-2 rounded-md overflow-hidden min-w-[140px] z-[50]" style={{ boxShadow: '0 8px 24px rgba(0,0,0,0.3)' }}>
               {isOwn ? (
                 <button
                   onClick={() => {
                     setMenuOpen(false);
                     if (confirm('Delete this post?')) deleteMutation.mutate();
                   }}
-                  {...stylex.props(styles.menuItem, styles.menuItemDanger)}
+                  className="block w-full py-3 px-4 bg-transparent border-none text-danger text-sm text-left cursor-pointer hover:bg-raised"
                 >
                   Delete post
                 </button>
               ) : (
                 <button
                   onClick={() => setMenuOpen(false)}
-                  {...stylex.props(styles.menuItem)}
+                  className="block w-full py-3 px-4 bg-transparent border-none text-fg text-sm text-left cursor-pointer hover:bg-raised"
                 >
                   Hide
                 </button>
@@ -144,18 +142,18 @@ export function PostCard({ post, onDelete }: Props) {
       </div>
 
       {/* Content */}
-      <p {...stylex.props(styles.content)}>{post.content}</p>
+      <p className="text-base text-fg whitespace-pre-wrap m-0" style={{ lineHeight: '1.55' }}>{post.content}</p>
 
       {/* Images */}
       {post.images.length > 0 && (
-        <div {...stylex.props(styles.imagesGrid, post.images.length === 1 && styles.imagesSingle)}>
+        <div className={`grid gap-0.5 mt-3 rounded-md overflow-hidden ${post.images.length === 1 ? 'grid-cols-1' : 'grid-cols-2'}`}>
           {post.images.map((img) => (
             <button
               key={img.id}
               onClick={() => setLightboxImg(img.url)}
-              {...stylex.props(styles.imageBtn)}
+              className="bg-transparent border-none p-0 cursor-pointer block leading-none"
             >
-              <img src={img.url} alt="" {...stylex.props(styles.postImage)} />
+              <img src={img.url} alt="" className="w-full aspect-square object-cover block" />
             </button>
           ))}
         </div>
@@ -163,11 +161,11 @@ export function PostCard({ post, onDelete }: Props) {
 
       {/* Linked workout */}
       {post.workoutLog && (
-        <div {...stylex.props(styles.linkedCard)}>
-          <span {...stylex.props(styles.linkedIcon)}>🏋️</span>
-          <span {...stylex.props(styles.linkedText)}>
+        <div className="flex items-center gap-2 mt-3 py-3 px-4 bg-surface-2 rounded-md">
+          <span className="text-base">🏋️</span>
+          <span className="text-sm text-fg font-medium">
             Workout{post.workoutLog.workoutName ? ` · ${post.workoutLog.workoutName}` : ''}
-            <span {...stylex.props(styles.linkedDate)}>
+            <span className="text-fg-muted font-normal">
               {' · '}{new Date(post.workoutLog.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
             </span>
           </span>
@@ -176,12 +174,12 @@ export function PostCard({ post, onDelete }: Props) {
 
       {/* Linked game */}
       {post.game && (
-        <div {...stylex.props(styles.linkedCard)}>
-          <span {...stylex.props(styles.linkedIcon)}>🏸</span>
-          <span {...stylex.props(styles.linkedText)}>
+        <div className="flex items-center gap-2 mt-3 py-3 px-4 bg-surface-2 rounded-md">
+          <span className="text-base">🏸</span>
+          <span className="text-sm text-fg font-medium">
             Badminton game
             {post.game.location && ` · ${post.game.location}`}
-            <span {...stylex.props(styles.linkedDate)}>
+            <span className="text-fg-muted font-normal">
               {' · '}{new Date(post.game.scheduledAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
             </span>
           </span>
@@ -189,8 +187,8 @@ export function PostCard({ post, onDelete }: Props) {
       )}
 
       {/* Reaction bar */}
-      <div {...stylex.props(styles.reactionBar)}>
-        <div {...stylex.props(styles.reactions)}>
+      <div className="flex items-center justify-between mt-3">
+        <div className="flex gap-1">
           {REACTION_TYPES.map((type) => {
             const summary = post.reactions.find((r) => r.type === type);
             const active = post.userReaction === type;
@@ -198,45 +196,45 @@ export function PostCard({ post, onDelete }: Props) {
               <button
                 key={type}
                 onClick={() => reactMutation.mutate(type)}
-                {...stylex.props(styles.reactionBtn, active && styles.reactionBtnActive)}
+                className={`bg-transparent border-none rounded-full py-2 px-3 text-sm font-medium cursor-pointer flex items-center gap-1.5 transition ${active ? 'bg-accent-soft text-accent-bright font-semibold' : 'text-fg-muted'}`}
               >
-                <span {...stylex.props(styles.reactionGlyph)}>{REACTION_GLYPH[type]}</span>
+                <span style={{ fontSize: '15px', lineHeight: 1 }}>{REACTION_GLYPH[type]}</span>
                 {summary ? summary.count : null}
               </button>
             );
           })}
         </div>
-        <span {...stylex.props(styles.spacer)} />
+        <span className="flex-1" />
         {totalReactions > 0 && (
-          <span {...stylex.props(styles.totalCount)}>
+          <span className="text-xs text-fg-dim mr-2">
             {totalReactions} {totalReactions === 1 ? 'reaction' : 'reactions'}
           </span>
         )}
         <button
           onClick={() => setShowComments((v) => !v)}
-          {...stylex.props(styles.commentToggle)}
+          className="bg-transparent border-none text-sm text-fg-muted cursor-pointer py-1 px-2 flex items-center gap-1.5"
         >
-          <span {...stylex.props(styles.reactionGlyph)}>◌</span>
+          <span style={{ fontSize: '15px', lineHeight: 1 }}>◌</span>
           {post.commentCount > 0 ? post.commentCount : 'Reply'}
         </button>
       </div>
 
       {/* Comments */}
       {showComments && (
-        <div {...stylex.props(styles.commentsSection)}>
+        <div className="mt-4 pt-3 border-t border-border-soft flex flex-col gap-3">
           {commentsQ.data?.comments.map((c) => (
-            <div key={c.id} {...stylex.props(styles.comment)}>
-              <div {...stylex.props(styles.commentAuthor)}>{c.author.name}</div>
-              <div {...stylex.props(styles.commentContent)}>{c.content}</div>
+            <div key={c.id} className="flex flex-col gap-0.5 relative">
+              <div className="text-xs font-bold text-fg">{c.author.name}</div>
+              <div className="text-sm text-fg">{c.content}</div>
               {c.author.id === user?.id && (
                 <button
                   onClick={() => deleteCommentMutation.mutate(c.id)}
-                  {...stylex.props(styles.commentDelete)}
+                  className="absolute top-0 right-0 bg-transparent border-none text-fg-muted text-xs cursor-pointer p-1"
                 >✕</button>
               )}
             </div>
           ))}
-          <div {...stylex.props(styles.commentInput)}>
+          <div className="flex gap-2 mt-1">
             <input
               value={commentText}
               onChange={(e) => setCommentText(e.target.value)}
@@ -246,12 +244,12 @@ export function PostCard({ post, onDelete }: Props) {
                   commentMutation.mutate(commentText.trim());
                 }
               }}
-              {...stylex.props(styles.commentField)}
+              className="flex-1 py-2 px-3 bg-surface-2 border-none rounded-md text-fg text-sm outline-none"
             />
             <button
               onClick={() => { if (commentText.trim()) commentMutation.mutate(commentText.trim()); }}
               disabled={commentMutation.isPending || !commentText.trim()}
-              {...stylex.props(styles.commentSubmit)}
+              className="py-2 px-3 bg-accent text-on-accent border-none rounded-md text-sm cursor-pointer font-semibold disabled:opacity-50 disabled:cursor-not-allowed"
             >
               Send
             </button>
@@ -261,238 +259,18 @@ export function PostCard({ post, onDelete }: Props) {
 
       {/* Lightbox */}
       {lightboxImg && (
-        <div {...stylex.props(styles.lightbox)} onClick={() => setLightboxImg(null)}>
-          <img src={lightboxImg} alt="" {...stylex.props(styles.lightboxImg)} />
+        <div
+          className="fixed inset-0 flex items-center justify-center z-[1000] cursor-zoom-out"
+          style={{ backgroundColor: 'rgba(0,0,0,0.9)' }}
+          onClick={() => setLightboxImg(null)}
+        >
+          <img
+            src={lightboxImg}
+            alt=""
+            className="max-w-[90vw] max-h-[90vh] object-contain rounded-md"
+          />
         </div>
       )}
     </article>
   );
 }
-
-const styles = stylex.create({
-  card: {
-    backgroundColor: colors.surface,
-    borderRadius: radii.lg,
-    overflow: 'hidden',
-    padding: `${spacing.s5} ${spacing.s5} ${spacing.s4}`,
-  },
-  header: {
-    display: 'flex',
-    alignItems: 'center',
-    gap: spacing.s3,
-    marginBottom: spacing.s3,
-  },
-  avatarWrap: { flexShrink: 0 },
-  avatar: {
-    width: '40px',
-    height: '40px',
-    borderRadius: radii.full,
-    objectFit: 'cover',
-  },
-  avatarFallback: {
-    width: '40px',
-    height: '40px',
-    borderRadius: radii.full,
-    backgroundColor: colors.accent,
-    color: colors.fgOnAccent,
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    fontSize: font.md,
-    fontWeight: 700,
-  },
-  authorInfo: { flex: 1, display: 'flex', flexDirection: 'column', gap: '2px' },
-  authorName: { fontSize: font.md, fontWeight: 600, color: colors.textPrimary },
-  timestamp: { fontSize: font.xs, color: colors.textDeep },
-  menuWrap: { position: 'relative' },
-  menuBtn: {
-    width: '32px',
-    height: '32px',
-    borderRadius: radii.full,
-    background: 'transparent',
-    border: 'none',
-    color: colors.textDeep,
-    fontSize: font.lg,
-    cursor: 'pointer',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    transition: 'background 0.15s',
-    ':hover': { backgroundColor: colors.surface2 },
-  },
-  menu: {
-    position: 'absolute',
-    top: 'calc(100% + 4px)',
-    right: 0,
-    backgroundColor: colors.surface2,
-    borderRadius: radii.md,
-    boxShadow: '0 8px 24px rgba(0,0,0,0.3)',
-    overflow: 'hidden',
-    minWidth: '140px',
-    zIndex: 50,
-  },
-  menuItem: {
-    display: 'block',
-    width: '100%',
-    padding: `${spacing.s3} ${spacing.s4}`,
-    background: 'transparent',
-    border: 'none',
-    color: colors.textPrimary,
-    fontSize: font.sm,
-    textAlign: 'left',
-    cursor: 'pointer',
-    ':hover': { backgroundColor: colors.surfaceRaised },
-  },
-  menuItemDanger: { color: colors.danger },
-  spacer: { flex: 1 },
-  totalCount: {
-    fontSize: font.xs,
-    color: colors.textDeep,
-    marginRight: spacing.s2,
-  },
-  reactionGlyph: {
-    fontSize: '15px',
-    lineHeight: 1,
-  },
-  content: {
-    fontSize: font.md,
-    color: colors.textPrimary,
-    lineHeight: '1.55',
-    whiteSpace: 'pre-wrap',
-    margin: 0,
-  },
-  imagesGrid: {
-    display: 'grid',
-    gridTemplateColumns: 'repeat(2, 1fr)',
-    gap: '2px',
-    marginTop: spacing.s3,
-    borderRadius: radii.md,
-    overflow: 'hidden',
-  },
-  imagesSingle: { gridTemplateColumns: '1fr' },
-  imageBtn: {
-    background: 'none',
-    border: 'none',
-    padding: 0,
-    cursor: 'pointer',
-    display: 'block',
-    lineHeight: 0,
-  },
-  postImage: {
-    width: '100%',
-    aspectRatio: '1',
-    objectFit: 'cover',
-    display: 'block',
-  },
-  linkedCard: {
-    display: 'flex',
-    alignItems: 'center',
-    gap: spacing.s2,
-    marginTop: spacing.s3,
-    padding: `${spacing.s3} ${spacing.s4}`,
-    backgroundColor: colors.bgOuter,
-    borderRadius: radii.md,
-  },
-  linkedIcon: { fontSize: font.md },
-  linkedText: { fontSize: font.sm, color: colors.textPrimary, fontWeight: 500 },
-  linkedDate: { color: colors.textSecondary, fontWeight: 400 },
-  reactionBar: {
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    marginTop: spacing.s3,
-  },
-  reactions: { display: 'flex', gap: spacing.s1 },
-  reactionBtn: {
-    background: 'transparent',
-    border: 'none',
-    borderRadius: radii.full,
-    padding: `${spacing.s2} ${spacing.s3}`,
-    fontSize: font.sm,
-    fontWeight: 500,
-    cursor: 'pointer',
-    color: colors.textSecondary,
-    display: 'flex',
-    alignItems: 'center',
-    gap: '5px',
-    transition: 'background 0.15s, color 0.15s',
-  },
-  reactionBtnActive: {
-    backgroundColor: colors.accentSoft,
-    color: colors.accentBright,
-    fontWeight: 600,
-  },
-  commentToggle: {
-    background: 'none',
-    border: 'none',
-    fontSize: font.sm,
-    color: colors.textSecondary,
-    cursor: 'pointer',
-    padding: `${spacing.s1} ${spacing.s2}`,
-  },
-  commentsSection: {
-    marginTop: spacing.s4,
-    paddingTop: spacing.s3,
-    borderTop: `1px solid ${colors.borderSoft}`,
-    display: 'flex',
-    flexDirection: 'column',
-    gap: spacing.s3,
-  },
-  comment: {
-    display: 'flex',
-    flexDirection: 'column',
-    gap: '2px',
-    position: 'relative',
-  },
-  commentAuthor: { fontSize: font.xs, fontWeight: 700, color: colors.textPrimary },
-  commentContent: { fontSize: font.sm, color: colors.textPrimary },
-  commentDelete: {
-    position: 'absolute',
-    top: 0,
-    right: 0,
-    background: 'none',
-    border: 'none',
-    color: colors.textSecondary,
-    fontSize: font.xs,
-    cursor: 'pointer',
-    padding: spacing.s1,
-  },
-  commentInput: { display: 'flex', gap: spacing.s2, marginTop: spacing.s1 },
-  commentField: {
-    flex: 1,
-    padding: `${spacing.s2} ${spacing.s3}`,
-    backgroundColor: colors.bgOuter,
-    border: 'none',
-    borderRadius: radii.md,
-    color: colors.textPrimary,
-    fontSize: font.sm,
-    outline: 'none',
-  },
-  commentSubmit: {
-    padding: `${spacing.s2} ${spacing.s3}`,
-    backgroundColor: colors.accent,
-    color: colors.fgOnAccent,
-    border: 'none',
-    borderRadius: radii.md,
-    fontSize: font.sm,
-    cursor: 'pointer',
-    fontWeight: 600,
-    ':disabled': { opacity: 0.5, cursor: 'not-allowed' },
-  },
-  lightbox: {
-    position: 'fixed',
-    inset: 0,
-    backgroundColor: 'rgba(0,0,0,0.9)',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    zIndex: 1000,
-    cursor: 'zoom-out',
-  },
-  lightboxImg: {
-    maxWidth: '90vw',
-    maxHeight: '90vh',
-    objectFit: 'contain',
-    borderRadius: radii.md,
-  },
-});

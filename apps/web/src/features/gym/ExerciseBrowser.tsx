@@ -1,8 +1,6 @@
 import { useState } from 'react';
-import * as stylex from '@stylexjs/stylex';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { api } from '../../lib/api.js';
-import { colors, font, radii, spacing } from '../../styles/tokens.stylex.js';
 import type { CreateCustomExerciseBody, ExerciseDTO } from '@orbit/shared';
 
 interface ExercisesResponse {
@@ -46,20 +44,20 @@ export function ExerciseBrowser() {
   const exercises = exercisesQ.data?.exercises ?? [];
 
   return (
-    <div {...stylex.props(styles.container)}>
+    <div className="flex flex-col gap-3">
       {/* Search */}
       <input
         value={search}
         onChange={(e) => setSearch(e.target.value)}
         placeholder="Search exercises…"
-        {...stylex.props(styles.searchInput)}
+        className="py-2 px-3 bg-surface border border-border rounded-md text-fg text-base w-full"
       />
 
       {/* Category filters */}
-      <div {...stylex.props(styles.chips)}>
+      <div className="flex gap-2 flex-wrap">
         <button
           onClick={() => setCategory('')}
-          {...stylex.props(styles.chip, category === '' && styles.chipActive)}
+          className={`py-1 px-3 rounded-full border text-sm cursor-pointer whitespace-nowrap ${category === '' ? 'bg-accent border-accent text-on-accent' : 'bg-transparent border-border text-fg-muted'}`}
         >
           All
         </button>
@@ -67,7 +65,7 @@ export function ExerciseBrowser() {
           <button
             key={cat}
             onClick={() => setCategory(cat === category ? '' : cat)}
-            {...stylex.props(styles.chip, category === cat && styles.chipActive)}
+            className={`py-1 px-3 rounded-full border text-sm cursor-pointer whitespace-nowrap ${category === cat ? 'bg-accent border-accent text-on-accent' : 'bg-transparent border-border text-fg-muted'}`}
           >
             {cat}
           </button>
@@ -75,52 +73,57 @@ export function ExerciseBrowser() {
       </div>
 
       {/* Add custom button */}
-      <div {...stylex.props(styles.customRow)}>
-        <button onClick={() => setShowCustomForm(true)} {...stylex.props(styles.customBtn)}>
+      <div className="flex justify-end">
+        <button
+          onClick={() => setShowCustomForm(true)}
+          className="py-1 px-3 bg-transparent border border-accent rounded-md text-accent text-sm cursor-pointer"
+        >
           + Custom Exercise
         </button>
       </div>
 
       {/* Exercise list */}
-      {exercisesQ.isLoading && <p {...stylex.props(styles.muted)}>Loading…</p>}
-      <div {...stylex.props(styles.list)}>
+      {exercisesQ.isLoading && <p className="text-fg-muted text-sm text-center pt-6">Loading…</p>}
+      <div className="flex flex-col gap-2">
         {exercises.map((ex) => (
           <button
             key={ex.id}
             onClick={() => setSelected(ex)}
-            {...stylex.props(styles.exerciseRow)}
+            className="flex items-center justify-between py-3 px-4 bg-surface border border-border rounded-md cursor-pointer text-left w-full"
           >
             <div>
-              <p {...stylex.props(styles.exName)}>{ex.name}</p>
-              <p {...stylex.props(styles.exMeta)}>
+              <p className="text-base font-semibold text-fg">{ex.name}</p>
+              <p className="text-xs text-fg-muted mt-0.5">
                 {ex.category}
                 {ex.muscleGroups.length > 0 && ` · ${ex.muscleGroups.slice(0, 3).join(', ')}`}
               </p>
             </div>
-            {ex.isCustom && <span {...stylex.props(styles.customTag)}>Custom</span>}
+            {ex.isCustom && (
+              <span className="text-xs text-accent border border-accent rounded-full py-px px-2 shrink-0">Custom</span>
+            )}
           </button>
         ))}
         {exercises.length === 0 && !exercisesQ.isLoading && (
-          <p {...stylex.props(styles.muted)}>No exercises found.</p>
+          <p className="text-fg-muted text-sm text-center pt-6">No exercises found.</p>
         )}
       </div>
 
       {/* Detail modal */}
       {selected && (
         <Modal onClose={() => setSelected(null)}>
-          <h3 {...stylex.props(styles.modalTitle)}>{selected.name}</h3>
-          <p {...stylex.props(styles.modalMeta)}>{selected.category}</p>
+          <h3 className="text-xl font-bold text-fg pr-6">{selected.name}</h3>
+          <p className="text-base text-fg-muted">{selected.category}</p>
           {selected.muscleGroups.length > 0 && (
-            <div {...stylex.props(styles.muscleChips)}>
+            <div className="flex flex-wrap gap-2">
               {selected.muscleGroups.map((m) => (
-                <span key={m} {...stylex.props(styles.muscleChip)}>{m}</span>
+                <span key={m} className="py-0.5 px-3 bg-raised rounded-full text-sm text-fg-muted">{m}</span>
               ))}
             </div>
           )}
           {selected.isCustom && (
             <button
               onClick={() => { if (confirm('Delete this exercise?')) deleteMutation.mutate(selected.id); }}
-              {...stylex.props(styles.deleteBtn)}
+              className="py-2 px-4 bg-transparent border border-danger rounded-md text-danger text-sm cursor-pointer"
             >
               Delete Custom Exercise
             </button>
@@ -163,30 +166,42 @@ function CustomExerciseForm({ onClose, onSaved }: { onClose: () => void; onSaved
 
   return (
     <Modal onClose={onClose}>
-      <h3 {...stylex.props(styles.modalTitle)}>New Custom Exercise</h3>
-      <div {...stylex.props(styles.formFields)}>
-        <label {...stylex.props(styles.label)}>Name *</label>
-        <input value={form.name} onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))} {...stylex.props(styles.input)} />
-        <label {...stylex.props(styles.label)}>Category *</label>
-        <input value={form.category} onChange={(e) => setForm((f) => ({ ...f, category: e.target.value }))} {...stylex.props(styles.input)} placeholder="e.g. Chest, Back, Legs" />
-        <label {...stylex.props(styles.label)}>Muscle Groups</label>
-        <div {...stylex.props(styles.muscleInputRow)}>
+      <h3 className="text-xl font-bold text-fg pr-6">New Custom Exercise</h3>
+      <div className="flex flex-col gap-2">
+        <label className="text-sm text-fg-muted">Name *</label>
+        <input
+          value={form.name}
+          onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))}
+          className="py-2 px-3 bg-surface border border-border rounded-md text-fg text-base"
+        />
+        <label className="text-sm text-fg-muted">Category *</label>
+        <input
+          value={form.category}
+          onChange={(e) => setForm((f) => ({ ...f, category: e.target.value }))}
+          placeholder="e.g. Chest, Back, Legs"
+          className="py-2 px-3 bg-surface border border-border rounded-md text-fg text-base"
+        />
+        <label className="text-sm text-fg-muted">Muscle Groups</label>
+        <div className="flex gap-2">
           <input
             value={muscleInput}
             onChange={(e) => setMuscleInput(e.target.value)}
             onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); addMuscle(); } }}
             placeholder="Type + Enter"
-            {...stylex.props(styles.input, styles.flex1)}
+            className="flex-1 py-2 px-3 bg-surface border border-border rounded-md text-fg text-base"
           />
-          <button onClick={addMuscle} {...stylex.props(styles.addMuscleBtn)}>Add</button>
+          <button
+            onClick={addMuscle}
+            className="py-2 px-3 bg-surface border border-border rounded-md text-fg-muted text-sm cursor-pointer shrink-0"
+          >Add</button>
         </div>
         {form.muscleGroups.length > 0 && (
-          <div {...stylex.props(styles.muscleChips)}>
+          <div className="flex flex-wrap gap-2">
             {form.muscleGroups.map((m) => (
               <button
                 key={m}
                 onClick={() => setForm((f) => ({ ...f, muscleGroups: f.muscleGroups.filter((x) => x !== m) }))}
-                {...stylex.props(styles.muscleChipRemove)}
+                className="py-0.5 px-3 bg-raised border-none rounded-full text-sm text-fg-muted cursor-pointer"
               >
                 {m} ✕
               </button>
@@ -197,7 +212,7 @@ function CustomExerciseForm({ onClose, onSaved }: { onClose: () => void; onSaved
       <button
         onClick={() => mutation.mutate(form)}
         disabled={mutation.isPending || !form.name.trim() || !form.category.trim()}
-        {...stylex.props(styles.submitBtn)}
+        className="py-3 px-4 bg-accent text-on-accent border-none rounded-md text-base font-semibold cursor-pointer w-full disabled:opacity-50"
       >
         {mutation.isPending ? 'Saving…' : 'Save'}
       </button>
@@ -207,9 +222,20 @@ function CustomExerciseForm({ onClose, onSaved }: { onClose: () => void; onSaved
 
 function Modal({ children, onClose }: { children: React.ReactNode; onClose: () => void }) {
   return (
-    <div {...stylex.props(styles.overlay)} onClick={onClose}>
-      <div {...stylex.props(styles.modal)} onClick={(e) => e.stopPropagation()}>
-        <button onClick={onClose} {...stylex.props(styles.closeBtn)}>✕</button>
+    <div
+      className="fixed inset-0 z-[200] flex items-end"
+      style={{ backgroundColor: 'rgba(0,0,0,0.6)' }}
+      onClick={onClose}
+    >
+      <div
+        className="w-full max-w-[480px] mx-auto bg-bg p-6 flex flex-col gap-4 max-h-[80dvh] overflow-y-auto relative"
+        style={{ borderRadius: 'var(--radius-lg) var(--radius-lg) 0 0' }}
+        onClick={(e) => e.stopPropagation()}
+      >
+        <button
+          onClick={onClose}
+          className="absolute top-4 right-4 bg-transparent border-none text-fg-muted text-lg cursor-pointer"
+        >✕</button>
         {children}
       </div>
     </div>
@@ -224,155 +250,3 @@ function useDebounce<T>(value: T, delay: number): T {
   });
   return debounced;
 }
-
-const styles = stylex.create({
-  container: { display: 'flex', flexDirection: 'column', gap: spacing.s3 },
-  searchInput: {
-    padding: `${spacing.s2} ${spacing.s3}`,
-    backgroundColor: colors.surface,
-    border: `1px solid ${colors.border}`,
-    borderRadius: radii.md,
-    color: colors.textPrimary,
-    fontSize: font.md,
-    width: '100%',
-  },
-  chips: { display: 'flex', gap: spacing.s2, flexWrap: 'wrap' },
-  chip: {
-    padding: `${spacing.s1} ${spacing.s3}`,
-    borderRadius: radii.full,
-    border: `1px solid ${colors.border}`,
-    backgroundColor: 'transparent',
-    color: colors.textSecondary,
-    fontSize: font.sm,
-    cursor: 'pointer',
-    whiteSpace: 'nowrap',
-  },
-  chipActive: { backgroundColor: colors.accent, borderColor: colors.accent, color: colors.fgOnAccent },
-  customRow: { display: 'flex', justifyContent: 'flex-end' },
-  customBtn: {
-    padding: `${spacing.s1} ${spacing.s3}`,
-    backgroundColor: 'transparent',
-    border: `1px solid ${colors.accent}`,
-    borderRadius: radii.md,
-    color: colors.accent,
-    fontSize: font.sm,
-    cursor: 'pointer',
-  },
-  list: { display: 'flex', flexDirection: 'column', gap: spacing.s2 },
-  exerciseRow: {
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    padding: `${spacing.s3} ${spacing.s4}`,
-    backgroundColor: colors.surface,
-    border: `1px solid ${colors.border}`,
-    borderRadius: radii.md,
-    cursor: 'pointer',
-    textAlign: 'left',
-    width: '100%',
-  },
-  exName: { fontSize: font.md, fontWeight: 600, color: colors.textPrimary },
-  exMeta: { fontSize: font.xs, color: colors.textSecondary, marginTop: '2px' },
-  customTag: {
-    fontSize: font.xs,
-    color: colors.accent,
-    border: `1px solid ${colors.accent}`,
-    borderRadius: radii.full,
-    padding: `1px ${spacing.s2}`,
-    flexShrink: 0,
-  },
-  muted: { color: colors.textSecondary, fontSize: font.sm, textAlign: 'center', paddingTop: spacing.s6 },
-  overlay: {
-    position: 'fixed',
-    inset: 0,
-    backgroundColor: 'rgba(0,0,0,0.6)',
-    zIndex: 200,
-    display: 'flex',
-    alignItems: 'flex-end',
-  },
-  modal: {
-    width: '100%',
-    maxWidth: '480px',
-    margin: '0 auto',
-    backgroundColor: colors.bg,
-    borderRadius: `${radii.lg} ${radii.lg} 0 0`,
-    padding: spacing.s6,
-    display: 'flex',
-    flexDirection: 'column',
-    gap: spacing.s4,
-    maxHeight: '80dvh',
-    overflowY: 'auto',
-    position: 'relative',
-  },
-  closeBtn: {
-    position: 'absolute',
-    top: spacing.s4,
-    right: spacing.s4,
-    background: 'none',
-    border: 'none',
-    color: colors.textSecondary,
-    fontSize: font.lg,
-    cursor: 'pointer',
-  },
-  modalTitle: { fontSize: font.xl, fontWeight: 700, color: colors.textPrimary, paddingRight: spacing.s6 },
-  modalMeta: { fontSize: font.md, color: colors.textSecondary },
-  muscleChips: { display: 'flex', flexWrap: 'wrap', gap: spacing.s2 },
-  muscleChip: {
-    padding: `2px ${spacing.s3}`,
-    backgroundColor: colors.surfaceRaised,
-    borderRadius: radii.full,
-    fontSize: font.sm,
-    color: colors.textSecondary,
-  },
-  muscleChipRemove: {
-    padding: `2px ${spacing.s3}`,
-    backgroundColor: colors.surfaceRaised,
-    border: 'none',
-    borderRadius: radii.full,
-    fontSize: font.sm,
-    color: colors.textSecondary,
-    cursor: 'pointer',
-  },
-  deleteBtn: {
-    padding: `${spacing.s2} ${spacing.s4}`,
-    backgroundColor: 'transparent',
-    border: `1px solid ${colors.danger}`,
-    borderRadius: radii.md,
-    color: colors.danger,
-    fontSize: font.sm,
-    cursor: 'pointer',
-  },
-  formFields: { display: 'flex', flexDirection: 'column', gap: spacing.s2 },
-  label: { fontSize: font.sm, color: colors.textSecondary },
-  input: {
-    padding: `${spacing.s2} ${spacing.s3}`,
-    backgroundColor: colors.surface,
-    border: `1px solid ${colors.border}`,
-    borderRadius: radii.md,
-    color: colors.textPrimary,
-    fontSize: font.md,
-  },
-  flex1: { flex: 1 },
-  muscleInputRow: { display: 'flex', gap: spacing.s2 },
-  addMuscleBtn: {
-    padding: `${spacing.s2} ${spacing.s3}`,
-    backgroundColor: colors.surface,
-    border: `1px solid ${colors.border}`,
-    borderRadius: radii.md,
-    color: colors.textSecondary,
-    fontSize: font.sm,
-    cursor: 'pointer',
-    flexShrink: 0,
-  },
-  submitBtn: {
-    padding: `${spacing.s3} ${spacing.s4}`,
-    backgroundColor: colors.accent,
-    color: colors.fgOnAccent,
-    border: 'none',
-    borderRadius: radii.md,
-    fontSize: font.md,
-    fontWeight: 600,
-    cursor: 'pointer',
-    width: '100%',
-  },
-});

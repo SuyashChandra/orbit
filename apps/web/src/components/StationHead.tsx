@@ -1,6 +1,4 @@
 import type { ReactNode } from 'react';
-import * as stylex from '@stylexjs/stylex';
-import { colors, font, spacing } from '../styles/tokens.stylex.js';
 
 interface Props {
   eyebrow?: string;
@@ -11,53 +9,15 @@ interface Props {
 
 export function StationHead({ eyebrow, title, sub, action }: Props) {
   return (
-    <div {...stylex.props(styles.head)}>
-      <div {...stylex.props(styles.left)}>
-        {eyebrow && <span {...stylex.props(styles.eyebrow)}>{eyebrow}</span>}
-        <h1 {...stylex.props(styles.title)}>{title}</h1>
-        {sub && <span {...stylex.props(styles.sub)}>{sub}</span>}
+    <div className="py-4 px-5 pb-2 flex items-end justify-between gap-3">
+      <div className="flex flex-col gap-0.5 min-w-0 flex-1">
+        {eyebrow && <span className="text-xs text-accent-bright font-medium mb-0.5">{eyebrow}</span>}
+        <h1 className="font-display text-[30px] font-semibold m-0 leading-[1.1] text-fg" style={{ letterSpacing: '-0.025em' }}>
+          {title}
+        </h1>
+        {sub && <span className="text-sm text-fg-muted mt-0.5">{sub}</span>}
       </div>
-      {action && <div {...stylex.props(styles.action)}>{action}</div>}
+      {action && <div className="shrink-0">{action}</div>}
     </div>
   );
 }
-
-const styles = stylex.create({
-  head: {
-    padding: `${spacing.s4} ${spacing.s5} ${spacing.s2}`,
-    display: 'flex',
-    alignItems: 'flex-end',
-    justifyContent: 'space-between',
-    gap: spacing.s3,
-  },
-  left: {
-    display: 'flex',
-    flexDirection: 'column',
-    gap: '2px',
-    minWidth: 0,
-    flex: 1,
-  },
-  eyebrow: {
-    fontSize: font.xs,
-    color: colors.accentBright,
-    fontWeight: 500,
-    marginBottom: '2px',
-  },
-  title: {
-    fontFamily: font.display,
-    fontSize: '30px',
-    fontWeight: 600,
-    letterSpacing: '-0.025em',
-    margin: 0,
-    lineHeight: 1.1,
-    color: colors.textPrimary,
-  },
-  sub: {
-    fontSize: font.sm,
-    color: colors.textSecondary,
-    marginTop: '2px',
-  },
-  action: {
-    flexShrink: 0,
-  },
-});

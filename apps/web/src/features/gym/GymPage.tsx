@@ -1,6 +1,4 @@
 import { useState } from 'react';
-import * as stylex from '@stylexjs/stylex';
-import { colors, font, radii, spacing } from '../../styles/tokens.stylex.js';
 import { StationHead } from '../../components/StationHead.js';
 import { TodayLog } from './TodayLog.js';
 import { WorkoutList } from './WorkoutList.js';
@@ -18,22 +16,22 @@ export function GymPage() {
   const [tab, setTab] = useState<GymTab>('today');
 
   return (
-    <div {...stylex.props(styles.page)}>
+    <div className="flex flex-col h-full">
       <StationHead eyebrow="Move" title="Gym" sub="Log your sets, build your routines." />
 
-      <div {...stylex.props(styles.tabs)}>
+      <div className="flex gap-1.5 py-2 px-4 pb-3 shrink-0">
         {(['today', 'workouts', 'exercises'] as GymTab[]).map((t) => (
           <button
             key={t}
             onClick={() => setTab(t)}
-            {...stylex.props(styles.tab, tab === t && styles.tabActive)}
+            className={`py-2 px-4 border-none text-sm font-medium rounded-full cursor-pointer ${tab === t ? 'bg-surface text-fg' : 'bg-transparent text-fg-muted'}`}
           >
             {TAB_LABELS[t]}
           </button>
         ))}
       </div>
 
-      <div {...stylex.props(styles.content)}>
+      <div className="flex-1 overflow-y-auto px-4 pb-8">
         {tab === 'today' && <TodayLog />}
         {tab === 'workouts' && <WorkoutList />}
         {tab === 'exercises' && <ExerciseBrowser />}
@@ -41,34 +39,3 @@ export function GymPage() {
     </div>
   );
 }
-
-const styles = stylex.create({
-  page: { display: 'flex', flexDirection: 'column', height: '100%' },
-  tabs: {
-    display: 'flex',
-    gap: '6px',
-    padding: `${spacing.s2} ${spacing.s4} ${spacing.s3}`,
-    flexShrink: 0,
-  },
-  tab: {
-    padding: `${spacing.s2} ${spacing.s4}`,
-    border: 'none',
-    background: 'transparent',
-    color: colors.textSecondary,
-    fontSize: font.sm,
-    fontWeight: 500,
-    borderRadius: radii.full,
-    cursor: 'pointer',
-  },
-  tabActive: {
-    backgroundColor: colors.surface,
-    color: colors.textPrimary,
-  },
-  content: {
-    flex: 1,
-    overflowY: 'auto',
-    paddingLeft: spacing.s4,
-    paddingRight: spacing.s4,
-    paddingBottom: spacing.s8,
-  },
-});

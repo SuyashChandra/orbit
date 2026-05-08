@@ -1,8 +1,6 @@
 import { useState } from 'react';
-import * as stylex from '@stylexjs/stylex';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { api } from '../../lib/api.js';
-import { colors, font, radii, spacing } from '../../styles/tokens.stylex.js';
 import type { WorkoutDTO } from '@orbit/shared';
 import { WorkoutBuilder } from './WorkoutBuilder.js';
 
@@ -45,51 +43,59 @@ export function WorkoutList() {
   }
 
   return (
-    <div {...stylex.props(styles.container)}>
-      <div {...stylex.props(styles.header)}>
-        <h3 {...stylex.props(styles.title)}>My Workouts</h3>
-        <button onClick={() => setCreating(true)} {...stylex.props(styles.addBtn)}>+ New</button>
+    <div className="flex flex-col gap-4">
+      <div className="flex items-center justify-between">
+        <h3 className="text-lg font-bold text-fg">My Workouts</h3>
+        <button
+          onClick={() => setCreating(true)}
+          className="py-2 px-4 bg-accent text-on-accent border-none rounded-md text-base font-semibold cursor-pointer"
+        >
+          + New
+        </button>
       </div>
 
       {creating && (
-        <div {...stylex.props(styles.createRow)}>
+        <div className="flex gap-2 items-center">
           <input
             value={newName}
             onChange={(e) => setNewName(e.target.value)}
             placeholder="Workout name…"
             autoFocus
             onKeyDown={(e) => { if (e.key === 'Enter' && newName.trim()) createMutation.mutate(newName.trim()); }}
-            {...stylex.props(styles.input)}
+            className="flex-1 py-2 px-3 bg-surface border border-border rounded-md text-fg text-base"
           />
           <button
             onClick={() => { if (newName.trim()) createMutation.mutate(newName.trim()); }}
             disabled={createMutation.isPending}
-            {...stylex.props(styles.saveBtn)}
+            className="py-2 px-3 bg-accent text-on-accent border-none rounded-md text-sm cursor-pointer"
           >
             {createMutation.isPending ? '…' : 'Create'}
           </button>
-          <button onClick={() => setCreating(false)} {...stylex.props(styles.cancelBtn)}>✕</button>
+          <button
+            onClick={() => setCreating(false)}
+            className="bg-transparent border-none text-fg-muted text-base cursor-pointer p-1"
+          >✕</button>
         </div>
       )}
 
-      {workoutsQ.isLoading && <p {...stylex.props(styles.muted)}>Loading…</p>}
+      {workoutsQ.isLoading && <p className="text-fg-muted text-sm text-center pt-6">Loading…</p>}
       {workoutsQ.data?.length === 0 && (
-        <p {...stylex.props(styles.muted)}>No workouts yet. Create one to get started.</p>
+        <p className="text-fg-muted text-sm text-center pt-6">No workouts yet. Create one to get started.</p>
       )}
 
-      <div {...stylex.props(styles.list)}>
+      <div className="flex flex-col gap-3">
         {workoutsQ.data?.map((w) => (
-          <div key={w.id} {...stylex.props(styles.card)}>
-            <button onClick={() => setEditing(w)} {...stylex.props(styles.cardMain)}>
-              <p {...stylex.props(styles.workoutName)}>{w.name}</p>
-              <p {...stylex.props(styles.workoutMeta)}>
+          <div key={w.id} className="flex items-center bg-surface border border-border rounded-lg overflow-hidden">
+            <button onClick={() => setEditing(w)} className="flex-1 p-4 bg-transparent border-none text-left cursor-pointer">
+              <p className="text-lg font-bold text-fg">{w.name}</p>
+              <p className="text-sm text-fg-muted mt-1">
                 {w.exercises.length} exercise{w.exercises.length !== 1 ? 's' : ''}
                 {w.exercises.length > 0 && ` · ${w.exercises.map((e) => e.exercise.name).slice(0, 3).join(', ')}${w.exercises.length > 3 ? '…' : ''}`}
               </p>
             </button>
             <button
               onClick={() => { if (confirm('Delete this workout?')) deleteMutation.mutate(w.id); }}
-              {...stylex.props(styles.deleteBtn)}
+              className="bg-transparent border-none text-fg-muted text-base cursor-pointer py-4 px-3 shrink-0"
             >
               ✕
             </button>
@@ -99,75 +105,3 @@ export function WorkoutList() {
     </div>
   );
 }
-
-const styles = stylex.create({
-  container: { display: 'flex', flexDirection: 'column', gap: spacing.s4 },
-  header: { display: 'flex', alignItems: 'center', justifyContent: 'space-between' },
-  title: { fontSize: font.lg, fontWeight: 700, color: colors.textPrimary },
-  addBtn: {
-    padding: `${spacing.s2} ${spacing.s4}`,
-    backgroundColor: colors.accent,
-    color: colors.fgOnAccent,
-    border: 'none',
-    borderRadius: radii.md,
-    fontSize: font.md,
-    fontWeight: 600,
-    cursor: 'pointer',
-  },
-  createRow: { display: 'flex', gap: spacing.s2, alignItems: 'center' },
-  input: {
-    flex: 1,
-    padding: `${spacing.s2} ${spacing.s3}`,
-    backgroundColor: colors.surface,
-    border: `1px solid ${colors.border}`,
-    borderRadius: radii.md,
-    color: colors.textPrimary,
-    fontSize: font.md,
-  },
-  saveBtn: {
-    padding: `${spacing.s2} ${spacing.s3}`,
-    backgroundColor: colors.accent,
-    color: colors.fgOnAccent,
-    border: 'none',
-    borderRadius: radii.md,
-    fontSize: font.sm,
-    cursor: 'pointer',
-  },
-  cancelBtn: {
-    background: 'none',
-    border: 'none',
-    color: colors.textSecondary,
-    fontSize: font.md,
-    cursor: 'pointer',
-    padding: spacing.s1,
-  },
-  muted: { color: colors.textSecondary, fontSize: font.sm, textAlign: 'center', paddingTop: spacing.s6 },
-  list: { display: 'flex', flexDirection: 'column', gap: spacing.s3 },
-  card: {
-    display: 'flex',
-    alignItems: 'center',
-    backgroundColor: colors.surface,
-    border: `1px solid ${colors.border}`,
-    borderRadius: radii.lg,
-    overflow: 'hidden',
-  },
-  cardMain: {
-    flex: 1,
-    padding: `${spacing.s4} ${spacing.s4}`,
-    background: 'none',
-    border: 'none',
-    textAlign: 'left',
-    cursor: 'pointer',
-  },
-  workoutName: { fontSize: font.lg, fontWeight: 700, color: colors.textPrimary },
-  workoutMeta: { fontSize: font.sm, color: colors.textSecondary, marginTop: spacing.s1 },
-  deleteBtn: {
-    background: 'none',
-    border: 'none',
-    color: colors.textSecondary,
-    fontSize: font.md,
-    cursor: 'pointer',
-    padding: `${spacing.s4} ${spacing.s3}`,
-    flexShrink: 0,
-  },
-});

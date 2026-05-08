@@ -1,9 +1,7 @@
 import { useState } from 'react';
-import * as stylex from '@stylexjs/stylex';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useParams, useNavigate } from 'react-router';
 import { api } from '../../lib/api.js';
-import { colors, font, radii, spacing } from '../../styles/tokens.stylex.js';
 import type { JobApplicationDTO, ResumeDTO, UpdateJobBody } from '@orbit/shared';
 import { JOB_STATUS } from '@orbit/shared';
 
@@ -81,20 +79,20 @@ export function JobDetailPage() {
   };
 
   const job = jobQ.data;
-  if (jobQ.isLoading) return <div {...stylex.props(styles.page)}><p {...stylex.props(styles.muted)}>Loading…</p></div>;
-  if (!job) return <div {...stylex.props(styles.page)}><p {...stylex.props(styles.muted)}>Not found.</p></div>;
+  if (jobQ.isLoading) return <div className="flex flex-col gap-4 p-4 pb-12"><p className="text-fg-muted text-sm">Loading…</p></div>;
+  if (!job) return <div className="flex flex-col gap-4 p-4 pb-12"><p className="text-fg-muted text-sm">Not found.</p></div>;
 
   const linkedIds = new Set(job.resumes.map((r) => r.id));
   const availableResumes = resumesQ.data?.filter((r) => !linkedIds.has(r.id)) ?? [];
 
   return (
-    <div {...stylex.props(styles.page)}>
+    <div className="flex flex-col gap-4 p-4 pb-12">
       {/* Back + delete */}
-      <div {...stylex.props(styles.topRow)}>
-        <button onClick={() => navigate('/jobs')} {...stylex.props(styles.backBtn)}>← Back</button>
+      <div className="flex justify-between items-center">
+        <button onClick={() => navigate('/jobs')} className="bg-transparent border-none text-accent text-base cursor-pointer p-0">← Back</button>
         <button
           onClick={() => { if (confirm('Delete this application?')) deleteMutation.mutate(); }}
-          {...stylex.props(styles.deleteBtn)}
+          className="bg-transparent border-none text-danger text-sm cursor-pointer"
         >
           Delete
         </button>
@@ -102,7 +100,7 @@ export function JobDetailPage() {
 
       {/* Status badge */}
       <span
-        {...stylex.props(styles.badge)}
+        className="inline-block py-1 px-3 rounded-full text-sm font-semibold w-fit"
         style={{ backgroundColor: STATUS_COLORS[job.status] + '22', color: STATUS_COLORS[job.status] }}
       >
         {STATUS_LABELS[job.status]}
@@ -116,7 +114,7 @@ export function JobDetailPage() {
         onStartEdit={() => setEditingField('companyName')}
         onSave={(v) => updateMutation.mutate({ companyName: v })}
         onCancel={() => setEditingField(null)}
-        style={styles.company}
+        className="text-[1.75rem] font-extrabold text-fg cursor-pointer leading-[1.2]"
       />
       <EditableField
         label="Job Title"
@@ -125,7 +123,7 @@ export function JobDetailPage() {
         onStartEdit={() => setEditingField('jobTitle')}
         onSave={(v) => updateMutation.mutate({ jobTitle: v })}
         onCancel={() => setEditingField(null)}
-        style={styles.jobTitle}
+        className="text-lg text-fg-muted cursor-pointer"
       />
       {(job.location || editingField === 'location') && (
         <EditableField
@@ -135,20 +133,20 @@ export function JobDetailPage() {
           onStartEdit={() => setEditingField('location')}
           onSave={(v) => updateMutation.mutate({ location: v })}
           onCancel={() => setEditingField(null)}
-          style={styles.location}
+          className="text-base text-fg-muted cursor-pointer"
         />
       )}
 
       {/* Status selector */}
-      <div {...stylex.props(styles.section)}>
-        <p {...stylex.props(styles.sectionLabel)}>Status</p>
-        <div {...stylex.props(styles.statusGrid)}>
+      <div className="flex flex-col gap-2">
+        <p className="text-xs text-fg-muted uppercase" style={{ letterSpacing: '0.08em' }}>Status</p>
+        <div className="flex flex-wrap gap-2">
           {JOB_STATUS.map((s) => (
             <button
               key={s}
               onClick={() => updateMutation.mutate({ status: s })}
-              {...stylex.props(styles.statusBtn, job.status === s && styles.statusBtnActive)}
-              style={job.status === s ? { borderColor: STATUS_COLORS[s], color: STATUS_COLORS[s] } : undefined}
+              className={`py-1 px-3 border rounded-full bg-transparent text-fg-muted text-sm cursor-pointer ${job.status === s ? 'font-bold' : ''}`}
+              style={job.status === s ? { borderColor: STATUS_COLORS[s], color: STATUS_COLORS[s] } : { borderColor: 'var(--color-border)' }}
             >
               {STATUS_LABELS[s]}
             </button>
@@ -157,8 +155,8 @@ export function JobDetailPage() {
       </div>
 
       {/* Description */}
-      <div {...stylex.props(styles.section)}>
-        <p {...stylex.props(styles.sectionLabel)}>Description</p>
+      <div className="flex flex-col gap-2">
+        <p className="text-xs text-fg-muted uppercase" style={{ letterSpacing: '0.08em' }}>Description</p>
         {editingField === 'jobDescription' ? (
           <EditableTextarea
             value={job.jobDescription ?? ''}
@@ -167,37 +165,38 @@ export function JobDetailPage() {
           />
         ) : (
           <p
-            {...stylex.props(styles.description)}
+            className="text-base text-fg cursor-pointer whitespace-pre-wrap"
+            style={{ lineHeight: 1.6 }}
             onClick={() => setEditingField('jobDescription')}
           >
-            {job.jobDescription || <span {...stylex.props(styles.placeholder)}>Tap to add description…</span>}
+            {job.jobDescription || <span className="text-fg-muted">Tap to add description…</span>}
           </p>
         )}
       </div>
 
       {/* Applied date */}
-      <div {...stylex.props(styles.section)}>
-        <p {...stylex.props(styles.sectionLabel)}>Applied</p>
-        <p {...stylex.props(styles.dateText)}>{new Date(job.appliedAt).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}</p>
+      <div className="flex flex-col gap-2">
+        <p className="text-xs text-fg-muted uppercase" style={{ letterSpacing: '0.08em' }}>Applied</p>
+        <p className="text-base text-fg">{new Date(job.appliedAt).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}</p>
       </div>
 
       {/* Resumes */}
-      <div {...stylex.props(styles.section)}>
-        <div {...stylex.props(styles.sectionHeader)}>
-          <p {...stylex.props(styles.sectionLabel)}>Resumes</p>
-          <button onClick={() => setShowResumePicker(true)} {...stylex.props(styles.linkBtn)}>
+      <div className="flex flex-col gap-2">
+        <div className="flex items-center justify-between">
+          <p className="text-xs text-fg-muted uppercase" style={{ letterSpacing: '0.08em' }}>Resumes</p>
+          <button onClick={() => setShowResumePicker(true)} className="bg-transparent border-none text-accent text-sm cursor-pointer">
             + Link
           </button>
         </div>
         {job.resumes.length === 0 && (
-          <p {...stylex.props(styles.muted)}>No resumes linked.</p>
+          <p className="text-fg-muted text-sm">No resumes linked.</p>
         )}
         {job.resumes.map((r) => (
-          <div key={r.id} {...stylex.props(styles.resumeRow)}>
-            <span {...stylex.props(styles.resumeName)}>{r.filename}</span>
-            <div {...stylex.props(styles.resumeActions)}>
-              <button onClick={() => downloadResume(r.id)} {...stylex.props(styles.resumeBtn)}>↓</button>
-              <button onClick={() => unlinkResumeMutation.mutate(r.id)} {...stylex.props(styles.resumeBtn)}>✕</button>
+          <div key={r.id} className="flex items-center justify-between py-2 px-3 bg-surface border border-border rounded-md">
+            <span className="text-sm text-fg flex-1 overflow-hidden text-ellipsis whitespace-nowrap">{r.filename}</span>
+            <div className="flex gap-2">
+              <button onClick={() => downloadResume(r.id)} className="bg-transparent border-none text-fg-muted cursor-pointer text-base p-1">↓</button>
+              <button onClick={() => unlinkResumeMutation.mutate(r.id)} className="bg-transparent border-none text-fg-muted cursor-pointer text-base p-1">✕</button>
             </div>
           </div>
         ))}
@@ -205,17 +204,25 @@ export function JobDetailPage() {
 
       {/* Resume picker */}
       {showResumePicker && (
-        <div {...stylex.props(styles.overlay)} onClick={() => setShowResumePicker(false)}>
-          <div {...stylex.props(styles.drawer)} onClick={(e) => e.stopPropagation()}>
-            <h3 {...stylex.props(styles.drawerTitle)}>Link a Resume</h3>
+        <div
+          className="fixed inset-0 z-[200] flex items-end"
+          style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}
+          onClick={() => setShowResumePicker(false)}
+        >
+          <div
+            className="w-full max-w-[480px] mx-auto bg-bg p-4 flex flex-col gap-3 max-h-[60dvh] overflow-y-auto"
+            style={{ borderRadius: 'var(--radius-lg) var(--radius-lg) 0 0' }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <h3 className="text-lg font-bold text-fg">Link a Resume</h3>
             {availableResumes.length === 0 ? (
-              <p {...stylex.props(styles.muted)}>No resumes available. Upload one in the Jobs tab.</p>
+              <p className="text-fg-muted text-sm">No resumes available. Upload one in the Jobs tab.</p>
             ) : (
               availableResumes.map((r) => (
                 <button
                   key={r.id}
                   onClick={() => linkResumeMutation.mutate(r.id)}
-                  {...stylex.props(styles.resumePickerItem)}
+                  className="py-3 px-4 bg-surface border border-border rounded-md text-fg text-base text-left cursor-pointer w-full"
                 >
                   {r.filename}
                 </button>
@@ -229,7 +236,7 @@ export function JobDetailPage() {
 }
 
 function EditableField({
-  label, value, isEditing, onStartEdit, onSave, onCancel, style,
+  label, value, isEditing, onStartEdit, onSave, onCancel, className,
 }: {
   label: string;
   value: string;
@@ -237,28 +244,28 @@ function EditableField({
   onStartEdit: () => void;
   onSave: (v: string) => void;
   onCancel: () => void;
-  style: stylex.StyleXStyles;
+  className: string;
 }) {
   const [local, setLocal] = useState(value);
 
   if (isEditing) {
     return (
-      <div {...stylex.props(styles.editRow)}>
+      <div className="flex gap-2 items-center">
         <input
           value={local}
           onChange={(e) => setLocal(e.target.value)}
-          {...stylex.props(styles.editInput)}
+          className="flex-1 py-2 px-3 bg-surface border border-accent rounded-md text-fg text-base w-full"
           autoFocus
         />
-        <button onClick={() => onSave(local)} {...stylex.props(styles.saveBtn)}>Save</button>
-        <button onClick={onCancel} {...stylex.props(styles.cancelBtn)}>✕</button>
+        <button onClick={() => onSave(local)} className="py-1 px-3 bg-accent text-on-accent border-none rounded-md text-sm cursor-pointer">Save</button>
+        <button onClick={onCancel} className="py-1 px-3 bg-transparent text-fg-muted border border-border rounded-md text-sm cursor-pointer">✕</button>
       </div>
     );
   }
 
   return (
-    <p {...stylex.props(style)} onClick={onStartEdit} title={`Tap to edit ${label}`}>
-      {value || <span {...stylex.props(styles.placeholder)}>Tap to add…</span>}
+    <p className={className} onClick={onStartEdit} title={`Tap to edit ${label}`}>
+      {value || <span className="text-fg-muted">Tap to add…</span>}
     </p>
   );
 }
@@ -266,132 +273,19 @@ function EditableField({
 function EditableTextarea({ value, onSave, onCancel }: { value: string; onSave: (v: string) => void; onCancel: () => void }) {
   const [local, setLocal] = useState(value);
   return (
-    <div {...stylex.props(styles.editCol)}>
+    <div className="flex flex-col gap-2">
       <textarea
         value={local}
         onChange={(e) => setLocal(e.target.value)}
         rows={6}
-        {...stylex.props(styles.editInput, styles.textarea)}
+        className="py-2 px-3 bg-surface border border-accent rounded-md text-fg text-base w-full resize-y"
+        style={{ fontFamily: 'inherit' }}
         autoFocus
       />
-      <div {...stylex.props(styles.editActions)}>
-        <button onClick={() => onSave(local)} {...stylex.props(styles.saveBtn)}>Save</button>
-        <button onClick={onCancel} {...stylex.props(styles.cancelBtn)}>Cancel</button>
+      <div className="flex gap-2">
+        <button onClick={() => onSave(local)} className="py-1 px-3 bg-accent text-on-accent border-none rounded-md text-sm cursor-pointer">Save</button>
+        <button onClick={onCancel} className="py-1 px-3 bg-transparent text-fg-muted border border-border rounded-md text-sm cursor-pointer">Cancel</button>
       </div>
     </div>
   );
 }
-
-const styles = stylex.create({
-  page: { display: 'flex', flexDirection: 'column', gap: spacing.s4, padding: spacing.s4, paddingBottom: spacing.s12 },
-  topRow: { display: 'flex', justifyContent: 'space-between', alignItems: 'center' },
-  backBtn: { background: 'none', border: 'none', color: colors.accent, fontSize: font.md, cursor: 'pointer', padding: 0 },
-  deleteBtn: { background: 'none', border: 'none', color: colors.danger, fontSize: font.sm, cursor: 'pointer' },
-  badge: {
-    display: 'inline-block',
-    padding: `4px ${spacing.s3}`,
-    borderRadius: radii.full,
-    fontSize: font.sm,
-    fontWeight: 600,
-    width: 'fit-content',
-  },
-  company: { fontSize: font.xxl, fontWeight: 800, color: colors.textPrimary, cursor: 'pointer', lineHeight: 1.2 },
-  jobTitle: { fontSize: font.lg, color: colors.textSecondary, cursor: 'pointer' },
-  location: { fontSize: font.md, color: colors.textSecondary, cursor: 'pointer' },
-  section: { display: 'flex', flexDirection: 'column', gap: spacing.s2 },
-  sectionHeader: { display: 'flex', alignItems: 'center', justifyContent: 'space-between' },
-  sectionLabel: { fontSize: font.xs, color: colors.textSecondary, textTransform: 'uppercase', letterSpacing: '0.08em' },
-  statusGrid: { display: 'flex', flexWrap: 'wrap', gap: spacing.s2 },
-  statusBtn: {
-    padding: `${spacing.s1} ${spacing.s3}`,
-    border: `1px solid ${colors.border}`,
-    borderRadius: radii.full,
-    backgroundColor: 'transparent',
-    color: colors.textSecondary,
-    fontSize: font.sm,
-    cursor: 'pointer',
-  },
-  statusBtnActive: { fontWeight: 700 },
-  description: { fontSize: font.md, color: colors.textPrimary, lineHeight: 1.6, cursor: 'pointer', whiteSpace: 'pre-wrap' },
-  placeholder: { color: colors.textSecondary },
-  dateText: { fontSize: font.md, color: colors.textPrimary },
-  linkBtn: { background: 'none', border: 'none', color: colors.accent, fontSize: font.sm, cursor: 'pointer' },
-  resumeRow: {
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    padding: `${spacing.s2} ${spacing.s3}`,
-    backgroundColor: colors.surface,
-    border: `1px solid ${colors.border}`,
-    borderRadius: radii.md,
-  },
-  resumeName: { fontSize: font.sm, color: colors.textPrimary, flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' },
-  resumeActions: { display: 'flex', gap: spacing.s2 },
-  resumeBtn: { background: 'none', border: 'none', color: colors.textSecondary, cursor: 'pointer', fontSize: font.md, padding: spacing.s1 },
-  muted: { color: colors.textSecondary, fontSize: font.sm },
-  editRow: { display: 'flex', gap: spacing.s2, alignItems: 'center' },
-  editCol: { display: 'flex', flexDirection: 'column', gap: spacing.s2 },
-  editInput: {
-    flex: 1,
-    padding: `${spacing.s2} ${spacing.s3}`,
-    backgroundColor: colors.surface,
-    border: `1px solid ${colors.accent}`,
-    borderRadius: radii.md,
-    color: colors.textPrimary,
-    fontSize: font.md,
-    width: '100%',
-  },
-  textarea: { resize: 'vertical', fontFamily: 'inherit' },
-  editActions: { display: 'flex', gap: spacing.s2 },
-  saveBtn: {
-    padding: `${spacing.s1} ${spacing.s3}`,
-    backgroundColor: colors.accent,
-    color: colors.fgOnAccent,
-    border: 'none',
-    borderRadius: radii.md,
-    fontSize: font.sm,
-    cursor: 'pointer',
-  },
-  cancelBtn: {
-    padding: `${spacing.s1} ${spacing.s3}`,
-    backgroundColor: 'transparent',
-    color: colors.textSecondary,
-    border: `1px solid ${colors.border}`,
-    borderRadius: radii.md,
-    fontSize: font.sm,
-    cursor: 'pointer',
-  },
-  overlay: {
-    position: 'fixed',
-    inset: 0,
-    backgroundColor: 'rgba(0,0,0,0.5)',
-    zIndex: 200,
-    display: 'flex',
-    alignItems: 'flex-end',
-  },
-  drawer: {
-    width: '100%',
-    maxWidth: '480px',
-    margin: '0 auto',
-    backgroundColor: colors.bg,
-    borderRadius: `${radii.lg} ${radii.lg} 0 0`,
-    padding: spacing.s4,
-    display: 'flex',
-    flexDirection: 'column',
-    gap: spacing.s3,
-    maxHeight: '60dvh',
-    overflowY: 'auto',
-  },
-  drawerTitle: { fontSize: font.lg, fontWeight: 700, color: colors.textPrimary },
-  resumePickerItem: {
-    padding: `${spacing.s3} ${spacing.s4}`,
-    backgroundColor: colors.surface,
-    border: `1px solid ${colors.border}`,
-    borderRadius: radii.md,
-    color: colors.textPrimary,
-    fontSize: font.md,
-    textAlign: 'left',
-    cursor: 'pointer',
-    width: '100%',
-  },
-});

@@ -1,9 +1,7 @@
 import { useEffect, useState } from 'react';
-import * as stylex from '@stylexjs/stylex';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { api } from '../../lib/api.js';
 import { avatarColor } from '../../lib/avatarColor.js';
-import { colors, font, radii, spacing } from '../../styles/tokens.stylex.js';
 import { StationHead } from '../../components/StationHead.js';
 import type { AddFriendBody, FriendDTO } from '@orbit/shared';
 
@@ -57,7 +55,7 @@ export function FriendsPage() {
     ?.data?.error;
 
   return (
-    <div {...stylex.props(styles.page)}>
+    <div className="flex flex-col pb-8">
       <StationHead
         eyebrow="People"
         title="Your circle"
@@ -65,52 +63,53 @@ export function FriendsPage() {
       />
 
       {/* Add friend card */}
-      <div {...stylex.props(styles.section)}>
-        <article {...stylex.props(styles.addCard)}>
-          <h2 {...stylex.props(styles.addTitle)}>Add a friend</h2>
-          <p {...stylex.props(styles.addHint)}>
+      <div className="py-2 px-4">
+        <article className="bg-surface rounded-lg p-5 flex flex-col gap-2">
+          <h2 className="font-display text-lg font-semibold text-fg m-0" style={{ letterSpacing: '-0.01em' }}>Add a friend</h2>
+          <p className="text-sm text-fg-muted m-0 mb-2">
             Type their friend code — they'll get a request.
           </p>
-          <div {...stylex.props(styles.addRow)}>
+          <div className="flex gap-2">
             <input
               value={code}
               onChange={(e) => setCode(e.target.value.toUpperCase().slice(0, 6))}
               placeholder="ABC123"
               maxLength={6}
-              {...stylex.props(styles.input)}
+              className="flex-1 py-3 px-4 bg-surface-2 border-none rounded-md text-fg text-lg font-semibold outline-none text-center uppercase"
+              style={{ fontFamily: 'var(--font-mono)', letterSpacing: '0.18em' }}
             />
             <button
               onClick={() => addMutation.mutate({ friendCode: code })}
               disabled={code.length < 6 || addMutation.isPending}
-              {...stylex.props(styles.sendBtn)}
+              className="py-2 px-5 bg-accent text-on-accent border-none rounded-full text-sm font-semibold cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed"
             >
               {addMutation.isPending ? '…' : 'Send'}
             </button>
           </div>
           {addMutation.isError && (
-            <p {...stylex.props(styles.errorMsg)}>{errorMsg ?? 'Something went wrong'}</p>
+            <p className="text-sm text-danger mt-2">{errorMsg ?? 'Something went wrong'}</p>
           )}
-          {flash && <p {...stylex.props(styles.flashMsg)}>✓ {flash}</p>}
+          {flash && <p className="text-sm text-accent-bright font-medium mt-2">✓ {flash}</p>}
         </article>
       </div>
 
       {/* Tabs */}
-      <div {...stylex.props(styles.tabs)}>
+      <div className="flex gap-1.5 py-2 px-4 pb-3">
         <button
           onClick={() => setTab('friends')}
-          {...stylex.props(styles.tab, tab === 'friends' && styles.tabActive)}
+          className={`py-2 px-4 border-none text-sm font-medium rounded-full flex items-center gap-1.5 cursor-pointer ${tab === 'friends' ? 'bg-surface text-fg' : 'bg-transparent text-fg-muted'}`}
         >
           Friends
-          <span {...stylex.props(styles.count, tab === 'friends' && styles.countActive)}>
+          <span className={`text-[11px] px-1.5 py-px rounded-full font-semibold ${tab === 'friends' ? 'bg-accent text-on-accent' : 'bg-surface-2 text-fg-muted'}`} style={{ padding: '1px 7px' }}>
             {friendCount}
           </span>
         </button>
         <button
           onClick={() => setTab('requests')}
-          {...stylex.props(styles.tab, tab === 'requests' && styles.tabActive)}
+          className={`py-2 px-4 border-none text-sm font-medium rounded-full flex items-center gap-1.5 cursor-pointer ${tab === 'requests' ? 'bg-surface text-fg' : 'bg-transparent text-fg-muted'}`}
         >
           Pending
-          <span {...stylex.props(styles.count, tab === 'requests' && styles.countActive)}>
+          <span className={`text-[11px] px-1.5 py-px rounded-full font-semibold ${tab === 'requests' ? 'bg-accent text-on-accent' : 'bg-surface-2 text-fg-muted'}`} style={{ padding: '1px 7px' }}>
             {pendingCount}
           </span>
         </button>
@@ -118,13 +117,13 @@ export function FriendsPage() {
 
       {/* Friends list */}
       {tab === 'friends' && (
-        <div {...stylex.props(styles.list)}>
-          {friendsQ.isLoading && <p {...stylex.props(styles.muted)}>Loading…</p>}
+        <div className="flex flex-col gap-2 px-4">
+          {friendsQ.isLoading && <p className="text-fg-muted text-sm text-center p-6">Loading…</p>}
           {!friendsQ.isLoading && friendCount === 0 && (
-            <div {...stylex.props(styles.empty)}>
-              <span {...stylex.props(styles.emptyGlyph)}>✿</span>
-              <span {...stylex.props(styles.emptyTitle)}>No friends yet</span>
-              <span {...stylex.props(styles.emptySub)}>
+            <div className="text-center py-8 px-5 text-fg-muted flex flex-col gap-1">
+              <span className="text-[32px] mb-2">✿</span>
+              <span className="font-display text-lg font-semibold text-fg">No friends yet</span>
+              <span className="text-sm text-fg-muted">
                 Share your code or add one above to start your circle.
               </span>
             </div>
@@ -135,33 +134,33 @@ export function FriendsPage() {
 
       {/* Requests list */}
       {tab === 'requests' && (
-        <div {...stylex.props(styles.list)}>
-          {requestsQ.isLoading && <p {...stylex.props(styles.muted)}>Loading…</p>}
+        <div className="flex flex-col gap-2 px-4">
+          {requestsQ.isLoading && <p className="text-fg-muted text-sm text-center p-6">Loading…</p>}
           {!requestsQ.isLoading && pendingCount === 0 && (
-            <div {...stylex.props(styles.empty)}>
-              <span {...stylex.props(styles.emptyGlyph)}>♡</span>
-              <span {...stylex.props(styles.emptyTitle)}>No pending requests</span>
+            <div className="text-center py-8 px-5 text-fg-muted flex flex-col gap-1">
+              <span className="text-[32px] mb-2">♡</span>
+              <span className="font-display text-lg font-semibold text-fg">No pending requests</span>
             </div>
           )}
           {requestsQ.data?.map((f) => (
-            <article key={f.id} {...stylex.props(styles.row)}>
+            <article key={f.id} className="flex items-center gap-3 p-3 bg-surface rounded-md">
               <Avatar name={f.user.name} avatar={f.user.avatar} seed={f.user.id} />
-              <div {...stylex.props(styles.rowInfo)}>
-                <span {...stylex.props(styles.rowName)}>{f.user.name}</span>
-                <span {...stylex.props(styles.rowCode)}>wants to be friends</span>
+              <div className="flex-1 flex flex-col gap-0.5 min-w-0">
+                <span className="text-base font-semibold text-fg">{f.user.name}</span>
+                <span className="text-xs text-fg-muted" style={{ fontFamily: 'var(--font-mono)', letterSpacing: '0.08em' }}>wants to be friends</span>
               </div>
-              <div {...stylex.props(styles.rowActions)}>
+              <div className="flex gap-2">
                 <button
                   onClick={() => respondMutation.mutate({ id: f.id, action: 'accept' })}
                   disabled={respondMutation.isPending}
-                  {...stylex.props(styles.acceptBtn)}
+                  className="py-2 px-4 bg-accent text-on-accent border-none rounded-full text-sm font-semibold cursor-pointer disabled:opacity-40"
                 >
                   Accept
                 </button>
                 <button
                   onClick={() => respondMutation.mutate({ id: f.id, action: 'decline' })}
                   disabled={respondMutation.isPending}
-                  {...stylex.props(styles.declineBtn)}
+                  className="py-2 px-4 bg-transparent text-fg-muted border-none rounded-full text-sm font-medium cursor-pointer hover:text-danger"
                 >
                   Decline
                 </button>
@@ -224,206 +223,12 @@ function Avatar({
 
 function FriendRow({ friend }: { friend: FriendDTO }) {
   return (
-    <article {...stylex.props(styles.row)}>
+    <article className="flex items-center gap-3 p-3 bg-surface rounded-md">
       <Avatar name={friend.user.name} avatar={friend.user.avatar} seed={friend.user.id} />
-      <div {...stylex.props(styles.rowInfo)}>
-        <span {...stylex.props(styles.rowName)}>{friend.user.name}</span>
-        <span {...stylex.props(styles.rowCode)}>{friend.user.friendCode}</span>
+      <div className="flex-1 flex flex-col gap-0.5 min-w-0">
+        <span className="text-base font-semibold text-fg">{friend.user.name}</span>
+        <span className="text-xs text-fg-muted" style={{ fontFamily: 'var(--font-mono)', letterSpacing: '0.08em' }}>{friend.user.friendCode}</span>
       </div>
     </article>
   );
 }
-
-const styles = stylex.create({
-  page: {
-    display: 'flex',
-    flexDirection: 'column',
-    paddingBottom: spacing.s8,
-  },
-  section: {
-    padding: `${spacing.s2} ${spacing.s4}`,
-  },
-  addCard: {
-    backgroundColor: colors.surface,
-    borderRadius: radii.lg,
-    padding: spacing.s5,
-    display: 'flex',
-    flexDirection: 'column',
-    gap: spacing.s2,
-  },
-  addTitle: {
-    fontFamily: font.display,
-    fontSize: font.lg,
-    fontWeight: 600,
-    color: colors.textPrimary,
-    margin: 0,
-    letterSpacing: '-0.01em',
-  },
-  addHint: {
-    fontSize: font.sm,
-    color: colors.textSecondary,
-    margin: 0,
-    marginBottom: spacing.s2,
-  },
-  addRow: {
-    display: 'flex',
-    gap: spacing.s2,
-  },
-  input: {
-    flex: 1,
-    padding: `${spacing.s3} ${spacing.s4}`,
-    backgroundColor: colors.surface2,
-    border: 'none',
-    borderRadius: radii.md,
-    color: colors.textPrimary,
-    fontSize: font.lg,
-    fontFamily: font.mono,
-    fontWeight: 600,
-    letterSpacing: '0.18em',
-    textAlign: 'center',
-    textTransform: 'uppercase',
-    outline: 'none',
-  },
-  sendBtn: {
-    padding: `${spacing.s2} ${spacing.s5}`,
-    backgroundColor: colors.accent,
-    color: colors.fgOnAccent,
-    border: 'none',
-    borderRadius: radii.full,
-    fontSize: font.sm,
-    fontWeight: 600,
-    cursor: 'pointer',
-    ':disabled': { opacity: 0.4, cursor: 'not-allowed' },
-  },
-  errorMsg: {
-    fontSize: font.sm,
-    color: colors.danger,
-    marginTop: spacing.s2,
-  },
-  flashMsg: {
-    fontSize: font.sm,
-    color: colors.accentBright,
-    fontWeight: 500,
-    marginTop: spacing.s2,
-  },
-  tabs: {
-    display: 'flex',
-    gap: '6px',
-    padding: `${spacing.s2} ${spacing.s4} ${spacing.s3}`,
-  },
-  tab: {
-    padding: `${spacing.s2} ${spacing.s4}`,
-    border: 'none',
-    background: 'transparent',
-    color: colors.textSecondary,
-    fontSize: font.sm,
-    fontWeight: 500,
-    borderRadius: radii.full,
-    display: 'flex',
-    alignItems: 'center',
-    gap: '6px',
-    cursor: 'pointer',
-  },
-  tabActive: {
-    backgroundColor: colors.surface,
-    color: colors.textPrimary,
-  },
-  count: {
-    fontSize: '11px',
-    backgroundColor: colors.surface2,
-    color: colors.textSecondary,
-    padding: '1px 7px',
-    borderRadius: radii.full,
-    fontWeight: 600,
-  },
-  countActive: {
-    backgroundColor: colors.accent,
-    color: colors.fgOnAccent,
-  },
-  list: {
-    display: 'flex',
-    flexDirection: 'column',
-    gap: spacing.s2,
-    padding: `0 ${spacing.s4}`,
-  },
-  muted: {
-    color: colors.textSecondary,
-    fontSize: font.sm,
-    textAlign: 'center',
-    padding: spacing.s6,
-  },
-  empty: {
-    textAlign: 'center',
-    padding: `${spacing.s8} ${spacing.s5}`,
-    color: colors.textSecondary,
-    display: 'flex',
-    flexDirection: 'column',
-    gap: spacing.s1,
-  },
-  emptyGlyph: {
-    fontSize: '32px',
-    marginBottom: spacing.s2,
-  },
-  emptyTitle: {
-    fontFamily: font.display,
-    fontSize: font.lg,
-    fontWeight: 600,
-    color: colors.textPrimary,
-  },
-  emptySub: {
-    fontSize: font.sm,
-    color: colors.textSecondary,
-  },
-  row: {
-    display: 'flex',
-    alignItems: 'center',
-    gap: spacing.s3,
-    padding: spacing.s3,
-    backgroundColor: colors.surface,
-    borderRadius: radii.md,
-  },
-  rowInfo: {
-    flex: 1,
-    display: 'flex',
-    flexDirection: 'column',
-    gap: '2px',
-    minWidth: 0,
-  },
-  rowName: {
-    fontSize: font.md,
-    fontWeight: 600,
-    color: colors.textPrimary,
-  },
-  rowCode: {
-    fontSize: font.xs,
-    color: colors.textSecondary,
-    fontFamily: font.mono,
-    letterSpacing: '0.08em',
-  },
-  rowActions: {
-    display: 'flex',
-    gap: spacing.s2,
-  },
-  acceptBtn: {
-    padding: `${spacing.s2} ${spacing.s4}`,
-    backgroundColor: colors.accent,
-    color: colors.fgOnAccent,
-    border: 'none',
-    borderRadius: radii.full,
-    fontSize: font.sm,
-    fontWeight: 600,
-    cursor: 'pointer',
-    ':disabled': { opacity: 0.4 },
-  },
-  declineBtn: {
-    padding: `${spacing.s2} ${spacing.s4}`,
-    backgroundColor: 'transparent',
-    color: colors.textSecondary,
-    border: 'none',
-    borderRadius: radii.full,
-    fontSize: font.sm,
-    fontWeight: 500,
-    cursor: 'pointer',
-    ':hover': { color: colors.danger },
-  },
-});

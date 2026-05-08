@@ -1,8 +1,6 @@
-import * as stylex from '@stylexjs/stylex';
 import { useQuery } from '@tanstack/react-query';
 import { useParams } from 'react-router';
 import axios from 'axios';
-import { colors, font, radii, spacing } from '../../styles/tokens.stylex.js';
 import type { BadmintonGameDTO } from '@orbit/shared';
 
 const publicApi = axios.create({
@@ -32,16 +30,16 @@ export function PublicGamePage() {
 
   if (gameQ.isLoading) {
     return (
-      <div {...stylex.props(styles.page)}>
-        <p {...stylex.props(styles.muted)}>Loading…</p>
+      <div className="min-h-dvh bg-bg flex items-start justify-center p-4">
+        <p className="text-fg-muted text-base mt-12">Loading…</p>
       </div>
     );
   }
 
   if (gameQ.isError || !gameQ.data) {
     return (
-      <div {...stylex.props(styles.page)}>
-        <p {...stylex.props(styles.muted)}>Game not found.</p>
+      <div className="min-h-dvh bg-bg flex items-start justify-center p-4">
+        <p className="text-fg-muted text-base mt-12">Game not found.</p>
       </div>
     );
   }
@@ -51,73 +49,73 @@ export function PublicGamePage() {
   const accepted = game.participants.filter((p) => p.status === 'accepted');
 
   return (
-    <div {...stylex.props(styles.page)}>
-      <div {...stylex.props(styles.card)}>
+    <div className="min-h-dvh bg-bg flex items-start justify-center p-4">
+      <div className="w-full max-w-[440px] bg-surface border border-border rounded-lg p-6 flex flex-col gap-4 mt-6">
         {/* Branding */}
-        <p {...stylex.props(styles.brand)}>🏸 Orbit</p>
+        <p className="text-lg font-bold text-accent">🏸 Orbit</p>
 
         {/* Status */}
         <span
-          {...stylex.props(styles.statusBadge)}
+          className="inline-block w-fit py-1 px-3 rounded-full text-sm font-semibold capitalize"
           style={{ color: STATUS_COLORS[game.status], backgroundColor: STATUS_COLORS[game.status] + '22' }}
         >
           {game.status}
         </span>
 
         {/* Date / time */}
-        <div {...stylex.props(styles.dateBlock)}>
-          <p {...stylex.props(styles.dateMain)}>
+        <div className="flex flex-col gap-1">
+          <p className="text-xl font-bold text-fg">
             {scheduledAt.toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
           </p>
-          <p {...stylex.props(styles.dateTime)}>
+          <p className="text-lg text-fg-muted">
             {scheduledAt.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
           </p>
         </div>
 
         {/* Location */}
         {game.location && (
-          <div {...stylex.props(styles.infoRow)}>
+          <div className="flex gap-2 items-start">
             <span>📍</span>
-            <p {...stylex.props(styles.infoText)}>{game.location}</p>
+            <p className="text-base text-fg flex-1">{game.location}</p>
           </div>
         )}
 
         {/* Notes */}
         {game.notes && (
-          <div {...stylex.props(styles.infoRow)}>
+          <div className="flex gap-2 items-start">
             <span>📝</span>
-            <p {...stylex.props(styles.infoText)}>{game.notes}</p>
+            <p className="text-base text-fg flex-1">{game.notes}</p>
           </div>
         )}
 
         {/* Organiser */}
-        <div {...stylex.props(styles.section)}>
-          <p {...stylex.props(styles.sectionLabel)}>Organiser</p>
-          <div {...stylex.props(styles.personRow)}>
+        <div className="flex flex-col gap-2">
+          <p className="text-xs text-fg-muted uppercase" style={{ letterSpacing: '0.08em' }}>Organiser</p>
+          <div className="flex items-center gap-3 py-2 border-b border-border">
             <Avatar name={game.creator.name} avatar={game.creator.avatar} />
-            <p {...stylex.props(styles.personName)}>{game.creator.name}</p>
+            <p className="text-base text-fg font-medium">{game.creator.name}</p>
           </div>
         </div>
 
         {/* Players */}
-        <div {...stylex.props(styles.section)}>
-          <p {...stylex.props(styles.sectionLabel)}>
+        <div className="flex flex-col gap-2">
+          <p className="text-xs text-fg-muted uppercase" style={{ letterSpacing: '0.08em' }}>
             Players ({accepted.length + 1} confirmed)
           </p>
 
           {/* Creator always confirmed */}
-          <div {...stylex.props(styles.personRow)}>
+          <div className="flex items-center gap-3 py-2 border-b border-border">
             <Avatar name={game.creator.name} avatar={game.creator.avatar} />
-            <p {...stylex.props(styles.personName)}>{game.creator.name}</p>
-            <span {...stylex.props(styles.pBadge)} style={{ color: '#10b981', backgroundColor: '#10b98122' }}>Going</span>
+            <p className="flex-1 text-base text-fg font-medium">{game.creator.name}</p>
+            <span className="text-xs font-semibold rounded-full capitalize px-2 py-0.5" style={{ color: '#10b981', backgroundColor: '#10b98122' }}>Going</span>
           </div>
 
           {game.participants.map((p) => (
-            <div key={p.userId} {...stylex.props(styles.personRow)}>
+            <div key={p.userId} className="flex items-center gap-3 py-2 border-b border-border">
               <Avatar name={p.name} avatar={p.avatar} />
-              <p {...stylex.props(styles.personName)}>{p.name}</p>
+              <p className="flex-1 text-base text-fg font-medium">{p.name}</p>
               <span
-                {...stylex.props(styles.pBadge)}
+                className="text-xs font-semibold rounded-full capitalize px-2 py-0.5"
                 style={{ color: PARTICIPANT_COLORS[p.status], backgroundColor: PARTICIPANT_COLORS[p.status] + '22' }}
               >
                 {p.status}
@@ -126,7 +124,7 @@ export function PublicGamePage() {
           ))}
         </div>
 
-        <p {...stylex.props(styles.footer)}>Shared via Orbit</p>
+        <p className="text-xs text-fg-muted text-center mt-2">Shared via Orbit</p>
       </div>
     </div>
   );
@@ -134,54 +132,10 @@ export function PublicGamePage() {
 
 function Avatar({ name, avatar }: { name: string; avatar: string | null }) {
   return avatar ? (
-    <img src={avatar} alt={name} {...stylex.props(styles.avatar)} />
+    <img src={avatar} alt={name} className="w-8 h-8 rounded-full object-cover shrink-0" />
   ) : (
-    <div {...stylex.props(styles.avatarFallback)}>{name.charAt(0).toUpperCase()}</div>
+    <div className="w-8 h-8 rounded-full bg-accent text-on-accent flex items-center justify-center text-sm font-bold shrink-0">
+      {name.charAt(0).toUpperCase()}
+    </div>
   );
 }
-
-const styles = stylex.create({
-  page: {
-    minHeight: '100dvh', backgroundColor: colors.bg,
-    display: 'flex', alignItems: 'flex-start', justifyContent: 'center',
-    padding: spacing.s4,
-  },
-  card: {
-    width: '100%', maxWidth: '440px',
-    backgroundColor: colors.surface, border: `1px solid ${colors.border}`,
-    borderRadius: radii.lg, padding: spacing.s6,
-    display: 'flex', flexDirection: 'column', gap: spacing.s4,
-    marginTop: spacing.s6,
-  },
-  brand: { fontSize: font.lg, fontWeight: 700, color: colors.accent },
-  statusBadge: {
-    display: 'inline-block', width: 'fit-content',
-    padding: `4px ${spacing.s3}`, borderRadius: radii.full,
-    fontSize: font.sm, fontWeight: 600, textTransform: 'capitalize',
-  },
-  dateBlock: { display: 'flex', flexDirection: 'column', gap: spacing.s1 },
-  dateMain: { fontSize: font.xl, fontWeight: 700, color: colors.textPrimary },
-  dateTime: { fontSize: font.lg, color: colors.textSecondary },
-  infoRow: { display: 'flex', gap: spacing.s2, alignItems: 'flex-start' },
-  infoText: { fontSize: font.md, color: colors.textPrimary, flex: 1 },
-  section: { display: 'flex', flexDirection: 'column', gap: spacing.s2 },
-  sectionLabel: { fontSize: font.xs, color: colors.textSecondary, textTransform: 'uppercase', letterSpacing: '0.08em' },
-  personRow: {
-    display: 'flex', alignItems: 'center', gap: spacing.s3,
-    padding: `${spacing.s2} 0`, borderBottom: `1px solid ${colors.border}`,
-  },
-  personName: { flex: 1, fontSize: font.md, color: colors.textPrimary, fontWeight: 500 },
-  pBadge: {
-    fontSize: font.xs, fontWeight: 600, borderRadius: radii.full,
-    padding: `2px ${spacing.s2}`, textTransform: 'capitalize',
-  },
-  avatar: { width: '32px', height: '32px', borderRadius: radii.full, objectFit: 'cover', flexShrink: 0 },
-  avatarFallback: {
-    width: '32px', height: '32px', borderRadius: radii.full,
-    backgroundColor: colors.accent, color: colors.fgOnAccent,
-    display: 'flex', alignItems: 'center', justifyContent: 'center',
-    fontSize: font.sm, fontWeight: 700, flexShrink: 0,
-  },
-  muted: { color: colors.textSecondary, fontSize: font.md, marginTop: spacing.s12 },
-  footer: { fontSize: font.xs, color: colors.textSecondary, textAlign: 'center', marginTop: spacing.s2 },
-});

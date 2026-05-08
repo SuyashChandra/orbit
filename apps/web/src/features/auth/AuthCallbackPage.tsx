@@ -1,9 +1,7 @@
 import { useEffect } from 'react';
 import { useNavigate } from 'react-router';
-import * as stylex from '@stylexjs/stylex';
 import { api } from '../../lib/api.js';
 import { useAuthStore } from './authStore.js';
-import { colors, font } from '../../styles/tokens.stylex.js';
 import type { UserDTO } from '@orbit/shared';
 
 export function AuthCallbackPage() {
@@ -35,22 +33,8 @@ export function AuthCallbackPage() {
   }, [navigate, setAccessToken, setUser]);
 
   return (
-    <div {...stylex.props(styles.page)}>
-      <p {...stylex.props(styles.text)}>Signing you in…</p>
+    <div className="min-h-dvh flex items-center justify-center bg-bg">
+      <p className="text-fg-muted text-base">Signing you in…</p>
     </div>
   );
 }
-
-const styles = stylex.create({
-  page: {
-    minHeight: '100dvh',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: colors.bg,
-  },
-  text: {
-    color: colors.textSecondary,
-    fontSize: font.md,
-  },
-});

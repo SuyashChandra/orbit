@@ -1,6 +1,3 @@
-import * as stylex from '@stylexjs/stylex';
-import { font, radii, spacing } from '../styles/tokens.stylex.js';
-
 interface PillMeta {
   label: string;
   color: string;
@@ -36,31 +33,14 @@ export function Pill({ status, label }: Props) {
   };
   return (
     <span
-      {...stylex.props(styles.pill)}
+      className="text-xs font-semibold py-1 px-3 rounded-full inline-flex items-center gap-1.5 whitespace-nowrap"
       style={{ color: meta.color, backgroundColor: meta.bg }}
     >
-      <span {...stylex.props(styles.dot)} style={{ backgroundColor: 'currentColor' }} />
+      <span
+        className="w-1.5 h-1.5 rounded-full"
+        style={{ backgroundColor: 'currentColor', opacity: 0.85 }}
+      />
       {label ?? meta.label}
     </span>
   );
 }
-
-const styles = stylex.create({
-  pill: {
-    fontSize: font.xs,
-    fontWeight: 600,
-    padding: `${spacing.s1} ${spacing.s3}`,
-    borderRadius: radii.full,
-    display: 'inline-flex',
-    alignItems: 'center',
-    gap: '6px',
-    whiteSpace: 'nowrap',
-  },
-  dot: {
-    width: '6px',
-    height: '6px',
-    borderRadius: radii.full,
-    opacity: 0.85,
-  },
-});
-

@@ -1,9 +1,7 @@
 import { useState } from 'react';
-import * as stylex from '@stylexjs/stylex';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { api } from '../../lib/api.js';
 import { useAuthStore } from '../auth/authStore.js';
-import { colors, font, radii, spacing } from '../../styles/tokens.stylex.js';
 import type { UpdateProfileBody, UserDTO } from '@orbit/shared';
 
 export function ProfilePage() {
@@ -40,195 +38,72 @@ export function ProfilePage() {
   if (!user) return null;
 
   return (
-    <div {...stylex.props(styles.page)}>
-      <div {...stylex.props(styles.avatarWrap)}>
+    <div className="flex flex-col items-center gap-6 p-6">
+      <div className="mt-4">
         {user.avatar ? (
-          <img src={user.avatar} alt={user.name} {...stylex.props(styles.avatar)} />
+          <img src={user.avatar} alt={user.name} className="w-[88px] h-[88px] rounded-full object-cover" />
         ) : (
-          <div {...stylex.props(styles.avatarFallback)}>
+          <div className="w-[88px] h-[88px] rounded-full bg-accent text-on-accent flex items-center justify-center font-bold" style={{ fontSize: '1.75rem', fontWeight: 700 }}>
             {user.name.charAt(0).toUpperCase()}
           </div>
         )}
       </div>
 
       {editing ? (
-        <div {...stylex.props(styles.editRow)}>
+        <div className="flex gap-2 w-full max-w-[320px]">
           <input
             value={name}
             onChange={(e) => setName(e.target.value)}
-            {...stylex.props(styles.input)}
+            className="flex-1 py-2 px-3 bg-surface border border-border rounded-md text-fg text-base"
             maxLength={80}
           />
           <button
             onClick={() => updateMutation.mutate({ name })}
             disabled={updateMutation.isPending || !name.trim()}
-            {...stylex.props(styles.btn, styles.btnAccent)}
+            className="py-3 px-4 bg-accent text-on-accent border-none rounded-md text-base font-semibold cursor-pointer"
           >
             {updateMutation.isPending ? 'Saving…' : 'Save'}
           </button>
-          <button onClick={() => setEditing(false)} {...stylex.props(styles.btn, styles.btnGhost)}>
+          <button
+            onClick={() => setEditing(false)}
+            className="py-3 px-4 bg-surface text-fg-muted border border-border rounded-md text-base font-semibold cursor-pointer"
+          >
             Cancel
           </button>
         </div>
       ) : (
-        <div {...stylex.props(styles.nameRow)}>
-          <h2 {...stylex.props(styles.name)}>{user.name}</h2>
-          <button onClick={() => setEditing(true)} {...stylex.props(styles.editBtn)}>
+        <div className="flex items-center gap-3">
+          <h2 className="text-xl font-bold text-fg">{user.name}</h2>
+          <button
+            onClick={() => setEditing(true)}
+            className="text-sm text-accent bg-transparent border-none cursor-pointer py-1 px-2"
+          >
             Edit
           </button>
         </div>
       )}
 
-      <p {...stylex.props(styles.email)}>{user.email}</p>
+      <p className="text-sm text-fg-muted">{user.email}</p>
 
-      <div {...stylex.props(styles.codeCard)}>
-        <span {...stylex.props(styles.codeLabel)}>Friend Code</span>
-        <div {...stylex.props(styles.codeRow)}>
-          <span {...stylex.props(styles.code)}>{user.friendCode}</span>
-          <button onClick={handleCopyCode} {...stylex.props(styles.copyBtn)}>
+      <div className="w-full max-w-[320px] bg-surface border border-border rounded-lg p-4 flex flex-col gap-2">
+        <span className="text-xs text-fg-muted uppercase" style={{ letterSpacing: '0.08em' }}>Friend Code</span>
+        <div className="flex items-center justify-between">
+          <span className="text-xl font-bold text-accent" style={{ letterSpacing: '0.12em' }}>{user.friendCode}</span>
+          <button
+            onClick={handleCopyCode}
+            className="text-sm text-accent bg-transparent border border-accent rounded-md py-1 px-3 cursor-pointer"
+          >
             {copied ? 'Copied!' : 'Copy'}
           </button>
         </div>
       </div>
 
-      <button onClick={handleLogout} {...stylex.props(styles.logoutBtn)}>
+      <button
+        onClick={handleLogout}
+        className="w-full max-w-[320px] py-3 px-4 rounded-md text-base font-semibold bg-transparent text-danger border border-danger cursor-pointer mt-4"
+      >
         Sign out
       </button>
     </div>
   );
 }
-
-const styles = stylex.create({
-  page: {
-    display: 'flex',
-    flexDirection: 'column',
-    alignItems: 'center',
-    gap: spacing.s6,
-    padding: spacing.s6,
-  },
-  avatarWrap: {
-    marginTop: spacing.s4,
-  },
-  avatar: {
-    width: '88px',
-    height: '88px',
-    borderRadius: radii.full,
-    objectFit: 'cover',
-  },
-  avatarFallback: {
-    width: '88px',
-    height: '88px',
-    borderRadius: radii.full,
-    backgroundColor: colors.accent,
-    color: colors.fgOnAccent,
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    fontSize: font.xxl,
-    fontWeight: 700,
-  },
-  nameRow: {
-    display: 'flex',
-    alignItems: 'center',
-    gap: spacing.s3,
-  },
-  name: {
-    fontSize: font.xl,
-    fontWeight: 700,
-    color: colors.textPrimary,
-  },
-  editBtn: {
-    fontSize: font.sm,
-    color: colors.accent,
-    background: 'none',
-    border: 'none',
-    cursor: 'pointer',
-    padding: `${spacing.s1} ${spacing.s2}`,
-  },
-  editRow: {
-    display: 'flex',
-    gap: spacing.s2,
-    width: '100%',
-    maxWidth: '320px',
-  },
-  input: {
-    flex: 1,
-    padding: `${spacing.s2} ${spacing.s3}`,
-    backgroundColor: colors.surface,
-    border: `1px solid ${colors.border}`,
-    borderRadius: radii.md,
-    color: colors.textPrimary,
-    fontSize: font.md,
-  },
-  email: {
-    fontSize: font.sm,
-    color: colors.textSecondary,
-  },
-  codeCard: {
-    width: '100%',
-    maxWidth: '320px',
-    backgroundColor: colors.surface,
-    border: `1px solid ${colors.border}`,
-    borderRadius: radii.lg,
-    padding: spacing.s4,
-    display: 'flex',
-    flexDirection: 'column',
-    gap: spacing.s2,
-  },
-  codeLabel: {
-    fontSize: font.xs,
-    color: colors.textSecondary,
-    textTransform: 'uppercase',
-    letterSpacing: '0.08em',
-  },
-  codeRow: {
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-  },
-  code: {
-    fontSize: font.xl,
-    fontWeight: 700,
-    color: colors.accent,
-    letterSpacing: '0.12em',
-  },
-  copyBtn: {
-    fontSize: font.sm,
-    color: colors.accent,
-    background: 'none',
-    border: `1px solid ${colors.accent}`,
-    borderRadius: radii.md,
-    padding: `${spacing.s1} ${spacing.s3}`,
-    cursor: 'pointer',
-  },
-  btn: {
-    padding: `${spacing.s3} ${spacing.s4}`,
-    borderRadius: radii.md,
-    fontSize: font.md,
-    fontWeight: 600,
-    border: 'none',
-    cursor: 'pointer',
-  },
-  btnAccent: {
-    backgroundColor: colors.accent,
-    color: colors.fgOnAccent,
-  },
-  btnGhost: {
-    backgroundColor: colors.surface,
-    color: colors.textSecondary,
-    border: `1px solid ${colors.border}`,
-  },
-  logoutBtn: {
-    width: '100%',
-    maxWidth: '320px',
-    padding: `${spacing.s3} ${spacing.s4}`,
-    borderRadius: radii.md,
-    fontSize: font.md,
-    fontWeight: 600,
-    backgroundColor: 'transparent',
-    color: colors.danger,
-    border: `1px solid ${colors.danger}`,
-    cursor: 'pointer',
-    marginTop: spacing.s4,
-  },
-});

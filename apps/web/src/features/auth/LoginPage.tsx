@@ -1,24 +1,27 @@
-import * as stylex from '@stylexjs/stylex';
-import { colors, font, radii, spacing } from '../../styles/tokens.stylex.js';
-
 export function LoginPage() {
   const handleGoogleLogin = () => {
     window.location.href = `${import.meta.env['VITE_API_URL']}/auth/google`;
   };
 
   return (
-    <div {...stylex.props(styles.page)}>
-      <div {...stylex.props(styles.card)}>
-        <div {...stylex.props(styles.logoWrap)}>
-          <span {...stylex.props(styles.mark)}>
-            <span {...stylex.props(styles.markDot)} />
+    <div className="min-h-dvh flex items-center justify-center bg-bg p-4">
+      <div className="flex flex-col items-center gap-6 p-10 bg-surface rounded-lg w-full max-w-[360px]">
+        <div className="flex items-center gap-3">
+          <span className="w-8 h-8 rounded-full bg-accent flex items-center justify-center">
+            <span className="w-2.5 h-2.5 rounded-full bg-bg" />
           </span>
-          <h1 {...stylex.props(styles.logo)}>orbit</h1>
+          <h1 className="font-display text-xl font-semibold italic text-fg tracking-tight leading-none" style={{ fontSize: '1.75rem' }}>
+            orbit
+          </h1>
         </div>
-        <p {...stylex.props(styles.tagline)}>
+        <p className="text-sm text-fg-muted text-center">
           A little bit of everything you care about.
         </p>
-        <button {...stylex.props(styles.googleBtn)} onClick={handleGoogleLogin}>
+        <button
+          className="flex items-center gap-3 py-3 px-6 border-none rounded-full text-base font-semibold w-full justify-center transition hover:opacity-90 active:opacity-80 cursor-pointer"
+          style={{ backgroundColor: '#fff', color: '#1f1f1f' }}
+          onClick={handleGoogleLogin}
+        >
           <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
             <path d="M17.64 9.2c0-.637-.057-1.251-.164-1.84H9v3.481h4.844c-.209 1.125-.843 2.078-1.796 2.716v2.259h2.908c1.702-1.567 2.684-3.875 2.684-6.615z" fill="#4285F4"/>
             <path d="M9 18c2.43 0 4.467-.806 5.956-2.184l-2.908-2.259c-.806.54-1.837.86-3.048.86-2.344 0-4.328-1.584-5.036-3.711H.957v2.332C2.438 15.983 5.482 18 9 18z" fill="#34A853"/>
@@ -31,76 +34,3 @@ export function LoginPage() {
     </div>
   );
 }
-
-const styles = stylex.create({
-  page: {
-    minHeight: '100dvh',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: colors.bg,
-    padding: spacing.s4,
-  },
-  card: {
-    display: 'flex',
-    flexDirection: 'column',
-    alignItems: 'center',
-    gap: spacing.s6,
-    padding: spacing.s10,
-    backgroundColor: colors.surface,
-    borderRadius: radii.lg,
-    width: '100%',
-    maxWidth: '360px',
-  },
-  logoWrap: {
-    display: 'flex',
-    alignItems: 'center',
-    gap: spacing.s3,
-  },
-  mark: {
-    width: '32px',
-    height: '32px',
-    borderRadius: radii.full,
-    backgroundColor: colors.accent,
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  markDot: {
-    width: '10px',
-    height: '10px',
-    borderRadius: radii.full,
-    backgroundColor: colors.bg,
-  },
-  logo: {
-    fontFamily: font.display,
-    fontSize: font.xxl,
-    fontWeight: 600,
-    fontStyle: 'italic',
-    color: colors.textPrimary,
-    letterSpacing: '-0.02em',
-    lineHeight: 1,
-  },
-  tagline: {
-    fontSize: font.sm,
-    color: colors.textSecondary,
-    textAlign: 'center',
-  },
-  googleBtn: {
-    display: 'flex',
-    alignItems: 'center',
-    gap: spacing.s3,
-    padding: `${spacing.s3} ${spacing.s6}`,
-    backgroundColor: '#fff',
-    color: '#1f1f1f',
-    border: 'none',
-    borderRadius: radii.full,
-    fontSize: font.md,
-    fontWeight: 600,
-    width: '100%',
-    justifyContent: 'center',
-    transition: 'opacity 0.15s',
-    ':hover': { opacity: 0.9 },
-    ':active': { opacity: 0.8 },
-  },
-});
