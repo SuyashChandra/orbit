@@ -60,7 +60,12 @@ export default defineConfig({
                   {
                     dev: true,
                     runtimeInjection: true,
-                    genConditionalClasses: true,
+                    // genConditionalClasses pre-generates `:not(#\#)` combination
+                    // rules for every conditional merge — with runtimeInjection each
+                    // module injects its own copy → dozens of duplicate <style> tags.
+                    // Only needed in prod where the rollup plugin deduplicates into
+                    // a single stylex.css file.
+                    genConditionalClasses: false,
                     treeshakeCompensation: true,
                     unstable_moduleResolution: {
                       type: 'commonJS',
