@@ -6,10 +6,10 @@ import { VitePWA } from 'vite-plugin-pwa';
 const isProd = process.env['NODE_ENV'] === 'production';
 
 /**
- * The rollup plugin emits stylex.css as a build asset via emitFile(), but
- * Vite doesn't automatically add a <link> for emitFile assets. This plugin
- * injects the <link> into index.html at build time so the browser loads the
- * stylesheet before React renders (no FOUC).
+ * Injects <link rel="stylesheet" href="/stylex.css"> into index.html at build
+ * time. The rollup plugin emits stylex.css via emitFile() but Vite won't add a
+ * <link> for it automatically — this ensures the browser loads the stylesheet
+ * before React renders (no FOUC).
  */
 function stylexLinkInjector(): Plugin {
   return {
@@ -29,24 +29,51 @@ function stylexLinkInjector(): Plugin {
 
 export default defineConfig({
   plugins: [
-    // enforce: 'pre' ensures this runs BEFORE the react plugin so its transform
-    // hook sees raw source files (with stylex.create() calls intact).
-    // Without this, the react babel plugin transforms StyleX first and the
-    // rollup plugin finds no rules to collect → stylex.css is never emitted.
+    // ── Production ────────────────────────────────────────────────────────────
+    // enforce:'pre' runs this before @vitejs/plugin-react so its transform hook
+    // sees raw source files with stylex.create() calls intact. Without it the
+    // react babel plugin transforms StyleX first → rollup plugin finds no rules
+    // → stylex.css is never emitted.
     //
-    // Behaviour by mode:
-    //   dev  (dev:true)  → runtimeInjection defaults to true → <style> tags via JS
-    //   prod (dev:false) → runtimeInjection defaults to false → CSS extracted to stylex.css
-    {
-      ...styleX({ fileName: 'stylex.css', dev: !isProd }),
-      enforce: 'pre',
-    },
-    stylexLinkInjector(),
+    // Not used in dev: Vite's dev server never calls generateBundle (so no CSS
+    // would be emitted anyway), and enforce:'pre' breaks JSX parsing in the
+    // dev-server pipeline before Vite's own TSX transforms have run.
+    ...(isProd
+      ? [
+          { ...styleX({ fileName: 'stylex.css', dev: false }), enforce: 'pre' } as Plugin,
+          stylexLinkInjector(),
+        ]
+      : []),
+
     react({
       exclude: /\.css$/,
-      // Do NOT add @stylexjs/babel-plugin here — the rollup plugin above handles
-      // the StyleX transform. Adding it again would double-transform and break things.
+      babel: {
+        plugins: [
+          // ── Development ─────────────────────────────────────────────────────
+          // In prod the rollup plugin handles all StyleX transforms (see above).
+          // In dev runtimeInjection injects <style> tags when each module loads,
+          // which is the only approach that works with Vite's dev server.
+          ...(!isProd
+            ? [
+                [
+                  '@stylexjs/babel-plugin',
+                  {
+                    dev: true,
+                    runtimeInjection: true,
+                    genConditionalClasses: true,
+                    treeshakeCompensation: true,
+                    unstable_moduleResolution: {
+                      type: 'commonJS',
+                      rootDir: process.cwd(),
+                    },
+                  },
+                ],
+              ]
+            : []),
+        ],
+      },
     }),
+
     VitePWA({
       registerType: 'autoUpdate',
       includeAssets: ['favicon.ico', 'apple-touch-icon.png', 'icons/*.png'],
