@@ -40,7 +40,7 @@ export default defineConfig({
     // dev-server pipeline before Vite's own TSX transforms have run.
     ...(isProd
       ? [
-          { ...styleX({ fileName: 'stylex.css', dev: false }), enforce: 'pre' } as Plugin,
+          { ...styleX({ fileName: 'stylex.css', dev: false, useCSSLayers: true }), enforce: 'pre' } as Plugin,
           stylexLinkInjector(),
         ]
       : []),
@@ -60,11 +60,12 @@ export default defineConfig({
                   {
                     dev: true,
                     runtimeInjection: true,
-                    // genConditionalClasses pre-generates `:not(#\#)` combination
-                    // rules for every conditional merge — with runtimeInjection each
-                    // module injects its own copy → dozens of duplicate <style> tags.
-                    // Only needed in prod where the rollup plugin deduplicates into
-                    // a single stylex.css file.
+                    // useCSSLayers replaces the :not(#\#) specificity hack with
+                    // CSS @layer — no duplicate rules, cleaner DevTools output.
+                    // genConditionalClasses is left off in dev (runtimeInjection
+                    // handles conditional merging at runtime without pre-generating
+                    // every combination as a separate injected rule).
+                    useCSSLayers: true,
                     genConditionalClasses: false,
                     treeshakeCompensation: true,
                     unstable_moduleResolution: {
