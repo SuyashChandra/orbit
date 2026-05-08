@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "tsx watch --env-file=.env src/app.ts",
-    "build": "tsup src/app.ts --format esm --out-dir dist --no-splitting",
+    "build": "tsup",
     "start": "node dist/app.js",
     "lint": "eslint src",
     "typecheck": "tsc --noEmit",
