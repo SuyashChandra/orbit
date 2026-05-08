@@ -1,33 +1,51 @@
-import { defineConfig } from 'vite';
+import { defineConfig, type Plugin } from 'vite';
 import react from '@vitejs/plugin-react';
+import styleX from '@stylexjs/rollup-plugin';
 import { VitePWA } from 'vite-plugin-pwa';
 
 const isDev = process.env['NODE_ENV'] !== 'production';
 
+/**
+ * The rollup plugin emits stylex.css as a build asset via emitFile(), but
+ * Vite doesn't automatically add a <link> for emitFile assets. This plugin
+ * injects the <link> into index.html at build time so the browser loads the
+ * stylesheet before React renders (no FOUC).
+ */
+function stylexLinkInjector(): Plugin {
+  return {
+    name: 'stylex-link-injector',
+    apply: 'build',
+    transformIndexHtml() {
+      return [
+        {
+          tag: 'link',
+          attrs: { rel: 'stylesheet', href: '/stylex.css' },
+          injectTo: 'head',
+        },
+      ];
+    },
+  };
+}
+
 export default defineConfig({
   plugins: [
+    // enforce: 'pre' ensures this runs BEFORE the react plugin so its transform
+    // hook sees raw source files (with stylex.create() calls intact).
+    // Without this, the react babel plugin transforms StyleX first and the
+    // rollup plugin finds no rules to collect → stylex.css is never emitted.
+    //
+    // Behaviour by mode:
+    //   dev  (dev:true)  → runtimeInjection defaults to true → <style> tags via JS
+    //   prod (dev:false) → runtimeInjection defaults to false → CSS extracted to stylex.css
+    {
+      ...styleX({ fileName: 'stylex.css' }),
+      enforce: 'pre',
+    },
+    stylexLinkInjector(),
     react({
       exclude: /\.css$/,
-      babel: {
-        plugins: [
-          [
-            '@stylexjs/babel-plugin',
-            {
-              dev: isDev,
-              // Always inject styles via <style> tags at runtime.
-              // The rollup plugin emits stylex.css but Vite never auto-injects
-              // a <link> for it, so styles silently vanish in production.
-              runtimeInjection: true,
-              genConditionalClasses: true,
-              treeshakeCompensation: true,
-              unstable_moduleResolution: {
-                type: 'commonJS',
-                rootDir: process.cwd(),
-              },
-            },
-          ],
-        ],
-      },
+      // Do NOT add @stylexjs/babel-plugin here — the rollup plugin above handles
+      // the StyleX transform. Adding it again would double-transform and break things.
     }),
     VitePWA({
       registerType: 'autoUpdate',
