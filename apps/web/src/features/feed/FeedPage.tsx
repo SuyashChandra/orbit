@@ -3,9 +3,18 @@ import * as stylex from '@stylexjs/stylex';
 import { useInfiniteQuery } from '@tanstack/react-query';
 import { api } from '../../lib/api.js';
 import { colors, font, radii, spacing } from '../../styles/tokens.stylex.js';
+import { useAuthStore } from '../auth/authStore.js';
 import { PostCard } from './PostCard.js';
 import { CreatePostModal } from './CreatePostModal.js';
 import type { PostDTO } from '@orbit/shared';
+
+function greetingWord() {
+  const h = new Date().getHours();
+  if (h < 5) return 'Good night';
+  if (h < 12) return 'Good morning';
+  if (h < 17) return 'Good afternoon';
+  return 'Good evening';
+}
 
 interface FeedPage {
   posts: PostDTO[];
@@ -13,8 +22,10 @@ interface FeedPage {
 }
 
 export function FeedPage() {
+  const user = useAuthStore((s) => s.user);
   const [showCreate, setShowCreate] = useState(false);
   const sentinelRef = useRef<HTMLDivElement>(null);
+  const firstName = user?.name?.split(' ')[0] ?? 'there';
 
   const feedQ = useInfiniteQuery<FeedPage>({
     queryKey: ['feed'],
@@ -47,13 +58,20 @@ export function FeedPage() {
 
   return (
     <div {...stylex.props(styles.page)}>
+      {/* Greeting */}
+      <div {...stylex.props(styles.greeting)}>
+        <h1 {...stylex.props(styles.greetingTitle)}>
+          {greetingWord()}, {firstName}
+        </h1>
+        <span {...stylex.props(styles.greetingSub)}>
+          A little bit of everything you care about.
+        </span>
+      </div>
+
       {/* Compose button */}
       <div {...stylex.props(styles.composeBar)}>
         <button onClick={() => setShowCreate(true)} {...stylex.props(styles.composeBtn)}>
-          What's on your mind?
-        </button>
-        <button onClick={() => setShowCreate(true)} {...stylex.props(styles.postIconBtn)}>
-          ✏️
+          Share something with your circle…
         </button>
       </div>
 
@@ -89,7 +107,7 @@ export function FeedPage() {
         )}
 
         {!feedQ.hasNextPage && allPosts.length > 0 && (
-          <p {...stylex.props(styles.muted, styles.center)}>You're all caught up 🎉</p>
+          <p {...stylex.props(styles.muted, styles.center)}>You're all caught up ✿</p>
         )}
       </div>
 
@@ -104,38 +122,43 @@ const styles = stylex.create({
     flexDirection: 'column',
     height: '100%',
   },
+  greeting: {
+    padding: `${spacing.s4} ${spacing.s5} ${spacing.s2}`,
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '2px',
+  },
+  greetingTitle: {
+    fontFamily: font.display,
+    fontWeight: 600,
+    fontSize: '26px',
+    letterSpacing: '-0.02em',
+    lineHeight: 1.1,
+    color: colors.textPrimary,
+    margin: 0,
+  },
+  greetingSub: {
+    fontSize: font.sm,
+    color: colors.textSecondary,
+  },
   composeBar: {
     display: 'flex',
     alignItems: 'center',
     gap: spacing.s3,
-    padding: spacing.s3,
-    borderBottom: `1px solid ${colors.border}`,
+    padding: `${spacing.s2} ${spacing.s4} ${spacing.s4}`,
     backgroundColor: colors.bg,
     flexShrink: 0,
   },
   composeBtn: {
     flex: 1,
-    padding: `${spacing.s3} ${spacing.s4}`,
+    padding: `${spacing.s3} ${spacing.s5}`,
     backgroundColor: colors.surface,
-    border: `1px solid ${colors.border}`,
-    borderRadius: radii.full,
-    color: colors.textSecondary,
-    fontSize: font.md,
-    textAlign: 'left',
-    cursor: 'pointer',
-  },
-  postIconBtn: {
-    width: '40px',
-    height: '40px',
-    backgroundColor: colors.accent,
     border: 'none',
     borderRadius: radii.full,
-    fontSize: font.md,
+    color: colors.textSecondary,
+    fontSize: font.sm,
+    textAlign: 'left',
     cursor: 'pointer',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    flexShrink: 0,
   },
   feed: {
     flex: 1,
@@ -166,8 +189,10 @@ const styles = stylex.create({
     textAlign: 'center',
   },
   emptyTitle: {
+    fontFamily: font.display,
     fontSize: font.xl,
-    fontWeight: 700,
+    fontWeight: 600,
+    letterSpacing: '-0.02em',
     color: colors.textPrimary,
   },
   emptyBody: {

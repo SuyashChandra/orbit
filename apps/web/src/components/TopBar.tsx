@@ -6,6 +6,26 @@ import { useAuthStore } from '../features/auth/authStore.js';
 import { colors, font, radii, spacing } from '../styles/tokens.stylex.js';
 import type { NotificationDTO } from '@orbit/shared';
 
+const NOTIF_META: Record<string, { label: string; glyph: string }> = {
+  job_followup_1d: { label: 'Follow up — 1 day',  glyph: '✦' },
+  job_followup_3d: { label: 'Follow up — 3 days', glyph: '✦' },
+  job_followup_5d: { label: 'Follow up — 5 days', glyph: '✦' },
+  game_invite:     { label: 'Game invite',        glyph: '◉' },
+  friend_request:  { label: 'Friend request',     glyph: '✿' },
+};
+
+function timeAgo(iso: string): string {
+  const diffMs = Date.now() - new Date(iso).getTime();
+  const min = Math.round(diffMs / 60_000);
+  if (min < 1) return 'just now';
+  if (min < 60) return `${min} min ago`;
+  const hr = Math.round(min / 60);
+  if (hr < 24) return `${hr}h ago`;
+  const day = Math.round(hr / 24);
+  if (day < 7) return `${day}d ago`;
+  return new Date(iso).toLocaleDateString();
+}
+
 export function TopBar() {
   const user = useAuthStore((s) => s.user);
   const [open, setOpen] = useState(false);
@@ -26,49 +46,72 @@ export function TopBar() {
   const sent = notifQ.data?.filter((n) => n.sentAt) ?? [];
   const unread = sent.filter((n) => !n.read).length;
 
-  const LABELS: Record<string, string> = {
-    job_followup_1d: 'Follow up — 1 day',
-    job_followup_3d: 'Follow up — 3 days',
-    job_followup_5d: 'Follow up — 5 days',
-    game_invite: 'Game invite',
-    friend_request: 'Friend request',
-  };
-
   return (
-    <header {...stylex.props(styles.bar)}>
-      <span {...stylex.props(styles.logo)}>Orbit</span>
+    <>
+      <header {...stylex.props(styles.bar)}>
+        <div {...stylex.props(styles.logoWrap)}>
+          <span {...stylex.props(styles.mark)}>
+            <span {...stylex.props(styles.markDot)} />
+          </span>
+          <span {...stylex.props(styles.logo)}>orbit</span>
+        </div>
 
-      {user && (
-        <button {...stylex.props(styles.bell)} onClick={() => setOpen((o) => !o)}>
-          🔔
-          {unread > 0 && <span {...stylex.props(styles.badge)}>{unread}</span>}
-        </button>
-      )}
+        {user && (
+          <button
+            {...stylex.props(styles.bell)}
+            onClick={() => setOpen(true)}
+            aria-label="Notifications"
+          >
+            <span {...stylex.props(styles.bellGlyph)}>◔</span>
+            {unread > 0 && <span {...stylex.props(styles.badge)}>{unread}</span>}
+          </button>
+        )}
+      </header>
 
       {open && (
-        <>
-          <div {...stylex.props(styles.overlay)} onClick={() => setOpen(false)} />
-          <div {...stylex.props(styles.dropdown)}>
-            <p {...stylex.props(styles.dropTitle)}>Notifications</p>
-            {sent.length === 0 && (
-              <p {...stylex.props(styles.empty)}>No notifications yet.</p>
-            )}
-            {sent.slice(0, 20).map((n) => (
-              <div
-                key={n.id}
-                {...stylex.props(styles.item, !n.read && styles.itemUnread)}
-                onClick={() => { if (!n.read) readMutation.mutate(n.id); setOpen(false); }}
+        <div {...stylex.props(styles.overlay)} onClick={() => setOpen(false)}>
+          <div {...stylex.props(styles.drawer)} onClick={(e) => e.stopPropagation()}>
+            <div {...stylex.props(styles.grip)} />
+            <div {...stylex.props(styles.drawerHeader)}>
+              <h3 {...stylex.props(styles.drawerTitle)}>Notifications</h3>
+              <button
+                onClick={() => setOpen(false)}
+                {...stylex.props(styles.closeBtn)}
+                aria-label="Close"
               >
-                <p {...stylex.props(styles.itemTitle)}>{LABELS[n.type] ?? n.type}</p>
-                <p {...stylex.props(styles.itemTime)}>
-                  {new Date(n.scheduledFor).toLocaleDateString()}
-                </p>
-              </div>
-            ))}
+                ✕
+              </button>
+            </div>
+
+            <div {...stylex.props(styles.body)}>
+              {sent.length === 0 && (
+                <p {...stylex.props(styles.empty)}>No notifications yet.</p>
+              )}
+              {sent.slice(0, 30).map((n) => {
+                const meta = NOTIF_META[n.type] ?? { label: n.type, glyph: '·' };
+                const time = n.sentAt ? timeAgo(n.sentAt) : '';
+                return (
+                  <button
+                    key={n.id}
+                    {...stylex.props(styles.item, !n.read && styles.itemUnread)}
+                    onClick={() => {
+                      if (!n.read) readMutation.mutate(n.id);
+                      setOpen(false);
+                    }}
+                  >
+                    <span {...stylex.props(styles.itemGlyph)}>{meta.glyph}</span>
+                    <span {...stylex.props(styles.itemBody)}>
+                      <span {...stylex.props(styles.itemTitle)}>{meta.label}</span>
+                      <span {...stylex.props(styles.itemTime)}>{time}</span>
+                    </span>
+                  </button>
+                );
+              })}
+            </div>
           </div>
-        </>
+        </div>
       )}
-    </header>
+    </>
   );
 }
 
@@ -83,33 +126,58 @@ const styles = stylex.create({
     height: 'var(--nav-height)',
     display: 'flex',
     alignItems: 'center',
-    paddingLeft: spacing.s4,
+    paddingLeft: spacing.s5,
     paddingRight: spacing.s4,
     backgroundColor: colors.bg,
-    borderBottom: `1px solid ${colors.border}`,
     zIndex: 100,
     justifyContent: 'space-between',
   },
+  logoWrap: { display: 'flex', alignItems: 'center', gap: spacing.s3 },
+  mark: {
+    width: '26px',
+    height: '26px',
+    borderRadius: radii.full,
+    backgroundColor: colors.accent,
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  markDot: {
+    width: '8px',
+    height: '8px',
+    borderRadius: radii.full,
+    backgroundColor: colors.bg,
+  },
   logo: {
+    fontFamily: font.display,
     fontSize: font.xl,
-    fontWeight: 700,
-    color: colors.accent,
-    letterSpacing: '-0.5px',
+    fontWeight: 600,
+    fontStyle: 'italic',
+    color: colors.textPrimary,
+    letterSpacing: '-0.02em',
+    lineHeight: 1,
   },
   bell: {
     position: 'relative',
     background: 'none',
     border: 'none',
-    fontSize: '20px',
     cursor: 'pointer',
-    padding: spacing.s1,
-    lineHeight: 1,
+    width: '38px',
+    height: '38px',
+    borderRadius: radii.full,
+    color: colors.textSecondary,
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    transition: 'background 0.15s, color 0.15s',
+    ':hover': { backgroundColor: colors.surface, color: colors.textPrimary },
   },
+  bellGlyph: { fontSize: '18px', lineHeight: 1 },
   badge: {
     position: 'absolute',
-    top: '-2px',
-    right: '-4px',
-    backgroundColor: colors.danger,
+    top: '4px',
+    right: '4px',
+    backgroundColor: colors.accent,
     color: colors.fgOnAccent,
     fontSize: '10px',
     fontWeight: 700,
@@ -119,42 +187,98 @@ const styles = stylex.create({
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
-    padding: '0 3px',
+    padding: '0 4px',
   },
+
+  // Drawer
   overlay: {
     position: 'fixed',
     inset: 0,
-    zIndex: 149,
+    backgroundColor: 'rgba(8, 16, 12, 0.6)',
+    backdropFilter: 'blur(4px)',
+    zIndex: 200,
+    display: 'flex',
+    alignItems: 'flex-end',
+    justifyContent: 'center',
   },
-  dropdown: {
-    position: 'absolute',
-    top: 'calc(var(--nav-height) - 4px)',
-    right: spacing.s2,
-    width: '300px',
-    backgroundColor: colors.bg,
-    border: `1px solid ${colors.border}`,
-    borderRadius: radii.lg,
-    boxShadow: '0 8px 24px rgba(0,0,0,0.3)',
-    zIndex: 150,
-    maxHeight: '400px',
+  drawer: {
+    width: '100%',
+    maxWidth: '480px',
+    backgroundColor: colors.surface,
+    borderRadius: '28px 28px 0 0',
+    display: 'flex',
+    flexDirection: 'column',
+    maxHeight: '92dvh',
     overflowY: 'auto',
+    paddingBottom: spacing.s5,
   },
-  dropTitle: {
-    fontSize: font.sm,
-    fontWeight: 700,
+  grip: {
+    width: '36px',
+    height: '4px',
+    borderRadius: '2px',
+    backgroundColor: colors.border,
+    margin: `${spacing.s2} auto 0`,
+  },
+  drawerHeader: {
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    padding: `${spacing.s3} ${spacing.s5} ${spacing.s2}`,
+  },
+  drawerTitle: {
+    fontFamily: font.display,
+    fontSize: font.xl,
+    fontWeight: 600,
+    color: colors.textPrimary,
+    letterSpacing: '-0.02em',
+    margin: 0,
+  },
+  closeBtn: {
+    background: colors.surface2,
+    border: 'none',
     color: colors.textSecondary,
-    textTransform: 'uppercase',
-    letterSpacing: '0.08em',
-    padding: `${spacing.s3} ${spacing.s4}`,
-    borderBottom: `1px solid ${colors.border}`,
-  },
-  empty: { fontSize: font.sm, color: colors.textSecondary, padding: spacing.s4, textAlign: 'center' },
-  item: {
-    padding: `${spacing.s3} ${spacing.s4}`,
+    fontSize: font.sm,
     cursor: 'pointer',
-    borderBottom: `1px solid ${colors.border}`,
+    width: '32px',
+    height: '32px',
+    borderRadius: radii.full,
   },
-  itemUnread: { backgroundColor: colors.surfaceRaised },
+  body: {
+    padding: `0 ${spacing.s5}`,
+  },
+  empty: {
+    fontSize: font.sm,
+    color: colors.textSecondary,
+    padding: spacing.s8,
+    textAlign: 'center',
+  },
+  item: {
+    display: 'flex',
+    gap: spacing.s3,
+    padding: `${spacing.s3} 0`,
+    background: 'transparent',
+    border: 'none',
+    borderBottom: `1px solid ${colors.borderSoft}`,
+    width: '100%',
+    textAlign: 'left',
+    cursor: 'pointer',
+    alignItems: 'center',
+  },
+  itemUnread: {},
+  itemGlyph: {
+    width: '38px',
+    height: '38px',
+    minWidth: '38px',
+    borderRadius: radii.full,
+    backgroundColor: colors.surface2,
+    color: colors.accentBright,
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    fontSize: '16px',
+    flexShrink: 0,
+  },
+  itemBody: { flex: 1, display: 'flex', flexDirection: 'column', gap: '2px', minWidth: 0 },
   itemTitle: { fontSize: font.sm, color: colors.textPrimary, fontWeight: 500 },
-  itemTime: { fontSize: font.xs, color: colors.textSecondary, marginTop: spacing.s1 },
+  itemTime: { fontSize: font.xs, color: colors.textSecondary },
 });

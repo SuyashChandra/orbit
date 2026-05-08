@@ -6,20 +6,13 @@ import { api } from '../../lib/api.js';
 import { colors, font, radii, spacing } from '../../styles/tokens.stylex.js';
 import type { CreateJobBody, JobApplicationDTO } from '@orbit/shared';
 import { JOB_STATUS } from '@orbit/shared';
+import { StationHead } from '../../components/StationHead.js';
+import { Pill } from '../../components/Pill.js';
 import { ResumesTab } from './ResumesTab.js';
 
 type PageTab = 'applications' | 'resumes';
 
 type JobStatus = (typeof JOB_STATUS)[number];
-
-const STATUS_COLORS: Record<JobStatus, string> = {
-  applied: '#6c63ff',
-  screening: '#3b82f6',
-  interviewing: '#f59e0b',
-  offer: '#10b981',
-  rejected: '#ef4444',
-  withdrawn: '#6b7280',
-};
 
 const STATUS_LABELS: Record<JobStatus, string> = {
   applied: 'Applied',
@@ -51,6 +44,12 @@ export function JobsPage() {
     },
   });
 
+  // Fetch full list once for stable counts (so chips don't disappear when filtered)
+  const allJobsQ = useQuery<JobsResponse>({
+    queryKey: ['jobs', 'all'],
+    queryFn: () => api.get<JobsResponse>('/jobs').then((r) => r.data),
+  });
+
   const deleteMutation = useMutation({
     mutationFn: (id: string) => api.delete(`/jobs/${id}`),
     onSuccess: () => qc.invalidateQueries({ queryKey: ['jobs'] }),
@@ -64,16 +63,28 @@ export function JobsPage() {
     },
   });
 
+  const allJobs = allJobsQ.data?.jobs ?? [];
+  const total = allJobs.length;
+  const counts = JOB_STATUS.reduce<Record<JobStatus, number>>((acc, s) => {
+    acc[s] = allJobs.filter((j) => j.status === s).length;
+    return acc;
+  }, {} as Record<JobStatus, number>);
+  const active = counts.applied + counts.screening + counts.interviewing + counts.offer;
+
   return (
     <div {...stylex.props(styles.page)}>
-      <div {...stylex.props(styles.header)}>
-        <h2 {...stylex.props(styles.title)}>Jobs</h2>
-        {pageTab === 'applications' && (
-          <button onClick={() => setShowForm(true)} {...stylex.props(styles.addBtn)}>
-            + Add
-          </button>
-        )}
-      </div>
+      <StationHead
+        eyebrow="Work"
+        title="Your applications"
+        sub={`${total} total · ${active} active`}
+        action={
+          pageTab === 'applications' && (
+            <button onClick={() => setShowForm(true)} {...stylex.props(styles.addBtn)}>
+              + Add
+            </button>
+          )
+        }
+      />
 
       {/* Page tabs */}
       <div {...stylex.props(styles.pageTabs)}>
@@ -91,74 +102,102 @@ export function JobsPage() {
         </button>
       </div>
 
-      {pageTab === 'resumes' && <ResumesTab />}
+      {pageTab === 'resumes' && <div {...stylex.props(styles.body)}><ResumesTab /></div>}
 
-      {pageTab === 'applications' && <>
-      {/* Status filter tabs */}
-      <div {...stylex.props(styles.filterRow)}>
-        {(['all', ...JOB_STATUS] as const).map((s) => (
-          <button
-            key={s}
-            onClick={() => setStatusFilter(s)}
-            {...stylex.props(styles.filterBtn, statusFilter === s && styles.filterBtnActive)}
-          >
-            {s === 'all' ? 'All' : STATUS_LABELS[s]}
-          </button>
-        ))}
-      </div>
+      {pageTab === 'applications' && (
+        <>
+          {/* Status filter chips */}
+          <div {...stylex.props(styles.chips)}>
+            <button
+              onClick={() => setStatusFilter('all')}
+              {...stylex.props(styles.chip, statusFilter === 'all' && styles.chipActive)}
+            >
+              All · {total}
+            </button>
+            {JOB_STATUS.map((s) => (
+              <button
+                key={s}
+                onClick={() => setStatusFilter(s)}
+                {...stylex.props(styles.chip, statusFilter === s && styles.chipActive)}
+              >
+                {STATUS_LABELS[s]} · {counts[s]}
+              </button>
+            ))}
+          </div>
 
-      {/* Job list */}
-      <div {...stylex.props(styles.list)}>
-        {jobsQ.isLoading && <p {...stylex.props(styles.muted)}>Loading…</p>}
-        {jobsQ.data?.jobs.length === 0 && (
-          <p {...stylex.props(styles.muted)}>No applications yet. Add one to get started.</p>
-        )}
-        {jobsQ.data?.jobs.map((job) => (
-          <Link key={job.id} to={`/jobs/${job.id}`} style={{ textDecoration: 'none' }}>
-            <JobCard job={job} onDelete={() => deleteMutation.mutate(job.id)} />
-          </Link>
-        ))}
-      </div>
+          {/* Job list */}
+          <div {...stylex.props(styles.list)}>
+            {jobsQ.isLoading && <p {...stylex.props(styles.muted)}>Loading…</p>}
+            {!jobsQ.isLoading && jobsQ.data?.jobs.length === 0 && (
+              <div {...stylex.props(styles.empty)}>
+                <span {...stylex.props(styles.emptyGlyph)}>✦</span>
+                <span {...stylex.props(styles.emptyTitle)}>Nothing here yet</span>
+                <span {...stylex.props(styles.emptySub)}>
+                  No applications in this phase.
+                </span>
+              </div>
+            )}
+            {jobsQ.data?.jobs.map((job) => (
+              <Link key={job.id} to={`/jobs/${job.id}`} style={{ textDecoration: 'none' }}>
+                <JobCard job={job} onDelete={() => deleteMutation.mutate(job.id)} />
+              </Link>
+            ))}
+          </div>
 
-      {/* Add job drawer */}
-      {showForm && (
-        <JobFormDrawer
-          onSubmit={(data) => addMutation.mutate(data)}
-          onClose={() => setShowForm(false)}
-          isSubmitting={addMutation.isPending}
-        />
+          {/* Add job drawer */}
+          {showForm && (
+            <JobFormDrawer
+              onSubmit={(data) => addMutation.mutate(data)}
+              onClose={() => setShowForm(false)}
+              isSubmitting={addMutation.isPending}
+            />
+          )}
+        </>
       )}
-      </>}
     </div>
   );
 }
 
 function JobCard({ job, onDelete }: { job: JobApplicationDTO; onDelete: () => void }) {
   return (
-    <div {...stylex.props(styles.card)}>
-      <div {...stylex.props(styles.cardMain)}>
-        <span
-          {...stylex.props(styles.badge)}
-          style={{ backgroundColor: STATUS_COLORS[job.status] + '22', color: STATUS_COLORS[job.status] }}
-        >
-          {STATUS_LABELS[job.status]}
-        </span>
-        <p {...stylex.props(styles.company)}>{job.companyName}</p>
-        <p {...stylex.props(styles.jobTitle)}>{job.jobTitle}</p>
-        {job.location && <p {...stylex.props(styles.location)}>{job.location}</p>}
-        <p {...stylex.props(styles.date)}>
+    <article {...stylex.props(styles.card)}>
+      <div {...stylex.props(styles.cardTopRow)}>
+        <span {...stylex.props(styles.cardDate)}>
           Applied {new Date(job.appliedAt).toLocaleDateString()}
-        </p>
+        </span>
+        <Pill status={job.status} />
       </div>
-      <button
-        onClick={(e) => { e.preventDefault(); onDelete(); }}
-        {...stylex.props(styles.deleteBtn)}
-        aria-label="Delete"
-      >
-        ✕
-      </button>
-    </div>
+
+      <h3 {...stylex.props(styles.cardTitle)}>{job.jobTitle}</h3>
+      <div {...stylex.props(styles.cardMeta)}>
+        <span {...stylex.props(styles.cardCompany)}>{job.companyName}</span>
+        {job.location && <span {...stylex.props(styles.cardLoc)}>· {job.location}</span>}
+      </div>
+
+      <div {...stylex.props(styles.cardFoot)}>
+        <span {...stylex.props(styles.cardArrow)}>↳</span>
+        <span {...stylex.props(styles.cardStage)}>{stageLabel(job)}</span>
+        <button
+          onClick={(e) => { e.preventDefault(); onDelete(); }}
+          {...stylex.props(styles.deleteBtn)}
+          aria-label="Remove"
+        >
+          ✕
+        </button>
+      </div>
+    </article>
   );
+}
+
+function stageLabel(job: JobApplicationDTO): string {
+  switch (job.status) {
+    case 'applied':      return 'Just submitted';
+    case 'screening':    return 'In screening';
+    case 'interviewing': return 'Interviewing';
+    case 'offer':        return 'Offer received';
+    case 'rejected':     return 'Closed — not moving forward';
+    case 'withdrawn':    return 'Withdrawn';
+  }
 }
 
 function JobFormDrawer({
@@ -178,35 +217,55 @@ function JobFormDrawer({
   });
 
   const set = (k: keyof CreateJobBody, v: string) => setForm((f) => ({ ...f, [k]: v }));
+  const valid = form.companyName?.trim() && form.jobTitle?.trim();
 
   return (
     <div {...stylex.props(styles.overlay)} onClick={onClose}>
       <div {...stylex.props(styles.drawer)} onClick={(e) => e.stopPropagation()}>
+        <div {...stylex.props(styles.grip)} />
         <div {...stylex.props(styles.drawerHeader)}>
-          <h3 {...stylex.props(styles.drawerTitle)}>Add Application</h3>
-          <button onClick={onClose} {...stylex.props(styles.closeBtn)}>✕</button>
+          <h3 {...stylex.props(styles.drawerTitle)}>Add an application</h3>
+          <button onClick={onClose} {...stylex.props(styles.closeBtn)} aria-label="Close">✕</button>
         </div>
 
         <div {...stylex.props(styles.formFields)}>
-          <Field label="Company *">
-            <input value={form.companyName} onChange={(e) => set('companyName', e.target.value)} {...stylex.props(styles.input)} />
+          <Field label="Company">
+            <input
+              value={form.companyName}
+              onChange={(e) => set('companyName', e.target.value)}
+              placeholder="e.g. Stripe"
+              {...stylex.props(styles.input)}
+            />
           </Field>
-          <Field label="Job Title *">
-            <input value={form.jobTitle} onChange={(e) => set('jobTitle', e.target.value)} {...stylex.props(styles.input)} />
+          <Field label="Role">
+            <input
+              value={form.jobTitle}
+              onChange={(e) => set('jobTitle', e.target.value)}
+              placeholder="e.g. Senior Frontend"
+              {...stylex.props(styles.input)}
+            />
           </Field>
           <Field label="Location">
-            <input value={form.location ?? ''} onChange={(e) => set('location', e.target.value)} {...stylex.props(styles.input)} />
-          </Field>
-          <Field label="Status">
-            <select
-              value={form.status}
-              onChange={(e) => set('status', e.target.value)}
+            <input
+              value={form.location ?? ''}
+              onChange={(e) => set('location', e.target.value)}
+              placeholder="Remote · NYC · …"
               {...stylex.props(styles.input)}
-            >
+            />
+          </Field>
+          <Field label="Where are you in the process?">
+            <div {...stylex.props(styles.statusChips)}>
               {JOB_STATUS.map((s) => (
-                <option key={s} value={s}>{STATUS_LABELS[s]}</option>
+                <button
+                  key={s}
+                  type="button"
+                  onClick={() => set('status', s)}
+                  {...stylex.props(styles.chip, form.status === s && styles.chipActive)}
+                >
+                  {STATUS_LABELS[s]}
+                </button>
               ))}
-            </select>
+            </div>
           </Field>
           <Field label="Description">
             <textarea
@@ -220,10 +279,10 @@ function JobFormDrawer({
 
         <button
           onClick={() => onSubmit(form)}
-          disabled={isSubmitting || !form.companyName.trim() || !form.jobTitle.trim()}
+          disabled={isSubmitting || !valid}
           {...stylex.props(styles.submitBtn)}
         >
-          {isSubmitting ? 'Adding…' : 'Add Application'}
+          {isSubmitting ? 'Saving…' : 'Save'}
         </button>
       </div>
     </div>
@@ -233,134 +292,224 @@ function JobFormDrawer({
 function Field({ label, children }: { label: string; children: React.ReactNode }) {
   return (
     <div {...stylex.props(styles.field)}>
-      <label {...stylex.props(styles.label)}>{label}</label>
+      <label {...stylex.props(styles.fieldLabel)}>{label}</label>
       {children}
     </div>
   );
 }
 
 const styles = stylex.create({
-  page: { display: 'flex', flexDirection: 'column', gap: spacing.s3, padding: spacing.s4 },
-  header: { display: 'flex', alignItems: 'center', justifyContent: 'space-between' },
-  title: { fontSize: font.xl, fontWeight: 700, color: colors.textPrimary },
+  page: { display: 'flex', flexDirection: 'column', paddingBottom: spacing.s8 },
+  body: { padding: `0 ${spacing.s4}` },
   addBtn: {
     padding: `${spacing.s2} ${spacing.s4}`,
     backgroundColor: colors.accent,
     color: colors.fgOnAccent,
     border: 'none',
-    borderRadius: radii.md,
-    fontSize: font.md,
+    borderRadius: radii.full,
+    fontSize: font.sm,
     fontWeight: 600,
     cursor: 'pointer',
   },
-  pageTabs: { display: 'flex', borderBottom: `1px solid ${colors.border}` },
+
+  // Page tabs (Applications / Resumes)
+  pageTabs: {
+    display: 'flex',
+    gap: '6px',
+    padding: `${spacing.s2} ${spacing.s4} ${spacing.s3}`,
+  },
   pageTab: {
     padding: `${spacing.s2} ${spacing.s4}`,
-    fontSize: font.md,
-    color: colors.textSecondary,
-    background: 'none',
     border: 'none',
-    borderBottom: '2px solid transparent',
-    cursor: 'pointer',
-    marginBottom: '-1px',
-  },
-  pageTabActive: { color: colors.accent, borderBottomColor: colors.accent },
-  filterRow: { display: 'flex', gap: spacing.s2, overflowX: 'auto', paddingBottom: spacing.s1 },
-  filterBtn: {
-    padding: `${spacing.s1} ${spacing.s3}`,
-    borderRadius: radii.full,
-    border: `1px solid ${colors.border}`,
-    backgroundColor: 'transparent',
+    background: 'transparent',
     color: colors.textSecondary,
     fontSize: font.sm,
-    whiteSpace: 'nowrap',
+    fontWeight: 500,
+    borderRadius: radii.full,
     cursor: 'pointer',
   },
-  filterBtnActive: {
-    backgroundColor: colors.accent,
-    borderColor: colors.accent,
-    color: colors.fgOnAccent,
-  },
-  list: { display: 'flex', flexDirection: 'column', gap: spacing.s3 },
-  muted: { color: colors.textSecondary, fontSize: font.sm, textAlign: 'center', paddingTop: spacing.s8 },
-  card: {
+  pageTabActive: { backgroundColor: colors.surface, color: colors.textPrimary },
+
+  // Status chips
+  chips: {
     display: 'flex',
-    alignItems: 'flex-start',
-    justifyContent: 'space-between',
-    padding: spacing.s4,
+    gap: spacing.s2,
+    padding: `0 ${spacing.s4} ${spacing.s3}`,
+    overflowX: 'auto',
+    scrollbarWidth: 'none',
+  },
+  chip: {
+    fontSize: font.sm,
+    fontWeight: 500,
+    padding: `${spacing.s2} ${spacing.s4}`,
+    borderRadius: radii.full,
+    border: 'none',
     backgroundColor: colors.surface,
-    border: `1px solid ${colors.border}`,
+    color: colors.textSecondary,
+    whiteSpace: 'nowrap',
+    cursor: 'pointer',
+    transition: 'background 0.15s, color 0.15s',
+  },
+  chipActive: {
+    backgroundColor: colors.accent,
+    color: colors.fgOnAccent,
+    fontWeight: 600,
+  },
+  statusChips: { display: 'flex', flexWrap: 'wrap', gap: '6px' },
+
+  list: {
+    display: 'flex',
+    flexDirection: 'column',
+    gap: spacing.s3,
+    padding: `0 ${spacing.s4}`,
+  },
+  muted: {
+    color: colors.textSecondary,
+    fontSize: font.sm,
+    textAlign: 'center',
+    padding: spacing.s8,
+  },
+  empty: {
+    textAlign: 'center',
+    padding: `${spacing.s8} ${spacing.s5}`,
+    display: 'flex',
+    flexDirection: 'column',
+    gap: spacing.s1,
+  },
+  emptyGlyph: { fontSize: '32px', marginBottom: spacing.s2, color: colors.accentBright },
+  emptyTitle: { fontFamily: font.display, fontSize: font.lg, fontWeight: 600, color: colors.textPrimary },
+  emptySub: { fontSize: font.sm, color: colors.textSecondary },
+
+  // Job card (cozy)
+  card: {
+    padding: spacing.s5,
+    backgroundColor: colors.surface,
     borderRadius: radii.lg,
+    cursor: 'pointer',
+  },
+  cardTopRow: {
+    display: 'flex',
+    justifyContent: 'space-between',
+    alignItems: 'flex-start',
+    gap: spacing.s2,
+    marginBottom: spacing.s2,
+  },
+  cardDate: { fontSize: font.xs, color: colors.textSecondary },
+  cardTitle: {
+    fontFamily: font.display,
+    fontSize: '22px',
+    fontWeight: 600,
+    color: colors.textPrimary,
+    letterSpacing: '-0.02em',
+    lineHeight: 1.15,
+    margin: 0,
+  },
+  cardMeta: {
+    display: 'flex',
+    alignItems: 'baseline',
+    gap: '6px',
+    marginTop: spacing.s1,
+  },
+  cardCompany: { fontSize: font.sm, color: colors.accentBright, fontWeight: 600 },
+  cardLoc: { fontSize: font.xs, color: colors.textSecondary },
+  cardFoot: {
+    marginTop: spacing.s4,
+    paddingTop: spacing.s3,
+    borderTop: `1px solid ${colors.borderSoft}`,
+    display: 'flex',
+    alignItems: 'center',
     gap: spacing.s2,
   },
-  cardMain: { display: 'flex', flexDirection: 'column', gap: spacing.s1, flex: 1 },
-  badge: {
-    display: 'inline-block',
-    padding: `2px ${spacing.s2}`,
-    borderRadius: radii.full,
-    fontSize: font.xs,
-    fontWeight: 600,
-    width: 'fit-content',
-  },
-  company: { fontSize: font.lg, fontWeight: 700, color: colors.textPrimary },
-  jobTitle: { fontSize: font.md, color: colors.textSecondary },
-  location: { fontSize: font.sm, color: colors.textSecondary },
-  date: { fontSize: font.xs, color: colors.textSecondary, marginTop: spacing.s1 },
+  cardArrow: { fontSize: font.sm, color: colors.textSecondary },
+  cardStage: { fontSize: font.sm, color: colors.textPrimary, flex: 1 },
   deleteBtn: {
-    background: 'none',
+    background: 'transparent',
     border: 'none',
-    color: colors.textSecondary,
+    color: colors.textDeep,
     cursor: 'pointer',
     fontSize: font.md,
     padding: spacing.s1,
     flexShrink: 0,
   },
+
+  // Drawer
   overlay: {
     position: 'fixed',
     inset: 0,
-    backgroundColor: 'rgba(0,0,0,0.5)',
+    backgroundColor: 'rgba(8, 16, 12, 0.6)',
+    backdropFilter: 'blur(4px)',
     zIndex: 200,
     display: 'flex',
     alignItems: 'flex-end',
+    justifyContent: 'center',
   },
   drawer: {
     width: '100%',
     maxWidth: '480px',
-    margin: '0 auto',
-    backgroundColor: colors.bg,
-    borderRadius: `${radii.lg} ${radii.lg} 0 0`,
-    padding: spacing.s4,
+    backgroundColor: colors.surface,
+    borderRadius: '28px 28px 0 0',
     display: 'flex',
     flexDirection: 'column',
     gap: spacing.s4,
-    maxHeight: '90dvh',
+    maxHeight: '92dvh',
     overflowY: 'auto',
+    padding: `${spacing.s2} ${spacing.s5} ${spacing.s5}`,
   },
-  drawerHeader: { display: 'flex', alignItems: 'center', justifyContent: 'space-between' },
-  drawerTitle: { fontSize: font.lg, fontWeight: 700, color: colors.textPrimary },
-  closeBtn: { background: 'none', border: 'none', color: colors.textSecondary, fontSize: font.lg, cursor: 'pointer' },
-  formFields: { display: 'flex', flexDirection: 'column', gap: spacing.s3 },
-  field: { display: 'flex', flexDirection: 'column', gap: spacing.s1 },
-  label: { fontSize: font.sm, color: colors.textSecondary },
+  grip: {
+    width: '36px',
+    height: '4px',
+    borderRadius: '2px',
+    backgroundColor: colors.border,
+    margin: `${spacing.s2} auto 0`,
+  },
+  drawerHeader: {
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  drawerTitle: {
+    fontFamily: font.display,
+    fontSize: font.xl,
+    fontWeight: 600,
+    color: colors.textPrimary,
+    letterSpacing: '-0.02em',
+    margin: 0,
+  },
+  closeBtn: {
+    background: colors.surface2,
+    border: 'none',
+    color: colors.textSecondary,
+    fontSize: font.sm,
+    cursor: 'pointer',
+    width: '32px',
+    height: '32px',
+    borderRadius: radii.full,
+  },
+  formFields: { display: 'flex', flexDirection: 'column', gap: spacing.s4 },
+  field: { display: 'flex', flexDirection: 'column', gap: spacing.s2 },
+  fieldLabel: { fontSize: font.sm, color: colors.textSecondary, fontWeight: 500 },
   input: {
-    padding: `${spacing.s2} ${spacing.s3}`,
-    backgroundColor: colors.surface,
-    border: `1px solid ${colors.border}`,
+    padding: `${spacing.s3} ${spacing.s4}`,
+    backgroundColor: colors.surface2,
+    border: 'none',
     borderRadius: radii.md,
     color: colors.textPrimary,
     fontSize: font.md,
     width: '100%',
+    outline: 'none',
+    fontFamily: font.sans,
   },
-  textarea: { resize: 'vertical', fontFamily: 'inherit' },
+  textarea: { resize: 'vertical', minHeight: '80px' },
   submitBtn: {
-    padding: `${spacing.s3} ${spacing.s4}`,
+    padding: spacing.s4,
     backgroundColor: colors.accent,
     color: colors.fgOnAccent,
     border: 'none',
-    borderRadius: radii.md,
+    borderRadius: radii.full,
     fontSize: font.md,
     fontWeight: 600,
     cursor: 'pointer',
     width: '100%',
+    ':disabled': { opacity: 0.4, cursor: 'not-allowed' },
   },
 });

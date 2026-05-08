@@ -9,9 +9,14 @@ export function LoginPage() {
   return (
     <div {...stylex.props(styles.page)}>
       <div {...stylex.props(styles.card)}>
-        <h1 {...stylex.props(styles.logo)}>Orbit</h1>
+        <div {...stylex.props(styles.logoWrap)}>
+          <span {...stylex.props(styles.mark)}>
+            <span {...stylex.props(styles.markDot)} />
+          </span>
+          <h1 {...stylex.props(styles.logo)}>orbit</h1>
+        </div>
         <p {...stylex.props(styles.tagline)}>
-          Jobs · Gym · Badminton · Friends
+          A little bit of everything you care about.
         </p>
         <button {...stylex.props(styles.googleBtn)} onClick={handleGoogleLogin}>
           <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
@@ -41,18 +46,40 @@ const styles = stylex.create({
     flexDirection: 'column',
     alignItems: 'center',
     gap: spacing.s6,
-    padding: spacing.s8,
+    padding: spacing.s10,
     backgroundColor: colors.surface,
     borderRadius: radii.lg,
-    border: `1px solid ${colors.border}`,
     width: '100%',
     maxWidth: '360px',
   },
+  logoWrap: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: spacing.s3,
+  },
+  mark: {
+    width: '32px',
+    height: '32px',
+    borderRadius: radii.full,
+    backgroundColor: colors.accent,
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  markDot: {
+    width: '10px',
+    height: '10px',
+    borderRadius: radii.full,
+    backgroundColor: colors.bg,
+  },
   logo: {
+    fontFamily: font.display,
     fontSize: font.xxl,
-    fontWeight: 800,
-    color: colors.accent,
-    letterSpacing: '-1px',
+    fontWeight: 600,
+    fontStyle: 'italic',
+    color: colors.textPrimary,
+    letterSpacing: '-0.02em',
+    lineHeight: 1,
   },
   tagline: {
     fontSize: font.sm,
@@ -67,7 +94,7 @@ const styles = stylex.create({
     backgroundColor: '#fff',
     color: '#1f1f1f',
     border: 'none',
-    borderRadius: radii.md,
+    borderRadius: radii.full,
     fontSize: font.md,
     fontWeight: 600,
     width: '100%',

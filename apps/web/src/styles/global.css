@@ -1,3 +1,5 @@
+@import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,ital,wght@9..144,0,500..700;9..144,1,500..700&family=Inter:wght@400;500;600;700&display=swap');
+
 *,
 *::before,
 *::after {
@@ -7,29 +9,35 @@
 }
 
 :root {
-  /* Color: Brand */
-  /* Lint #d7d7a8 · Teal Green #00a385 · Forest Green #00493a · Black #001f17 */
+  /* Cozy palette — warm dark mode, sage teal accent, paper-cream foreground */
 
   /* Surfaces */
-  --color-bg:             #001510;   /* app background */
-  --color-surface:        #001f17;   /* cards, modals, inputs */
-  --color-surface-raised: #00493a;   /* date blocks, hover, unread */
-  --color-border:         #00493a;   /* hairline separator */
+  --color-bg-outer:        #0c1411;   /* page gutter / outermost */
+  --color-bg:              #14201c;   /* device column / app bg */
+  --color-surface:         #1c2a25;   /* cards, inputs */
+  --color-surface-2:       #233631;   /* raised tiles */
+  --color-surface-raised:  #2c4239;   /* date blocks, hover, unread */
+  --color-border:          #2c4239;
+  --color-border-soft:     #233631;
 
   /* Foreground */
-  --color-text-primary:   #d7d7a8;   /* Lint */
-  --color-text-secondary: #8fa085;   /* muted Lint */
-  --color-fg-on-accent:   #001f17;   /* dark text on Teal Green */
+  --color-text-primary:    #ecead0;   /* warm paper-cream */
+  --color-text-secondary:  #a8b09a;
+  --color-text-deep:       #6f7868;
+  --color-fg-on-accent:    #0c1411;   /* dark text on teal */
 
-  /* Accent */
-  --color-accent:         #00a385;   /* Teal Green */
-  --color-accent-hover:   #00bf9c;
-  --color-accent-soft:    rgba(0, 163, 133, 0.13);
+  /* Accent — softer sage teal */
+  --color-accent:          #4fb89a;
+  --color-accent-bright:   #6ed4b6;
+  --color-accent-hover:    #6ed4b6;
+  --color-accent-soft:     rgba(79, 184, 154, 0.13);
 
-  /* Semantic */
-  --color-danger:         #ef4444;
-  --color-success:        #22c55e;
-  --color-warning:        #f59e0b;
+  /* Semantic — warmer set */
+  --color-danger:          #e08070;
+  --color-warning:         #e3a86a;
+  --color-info:            #8cb8d8;
+  --color-warm:            #e6c79a;
+  --color-success:         #4fb89a;
 
   /* Spacing scale */
   --space-1: 4px;
@@ -42,31 +50,32 @@
   --space-10: 40px;
   --space-12: 48px;
 
-  /* Radii */
-  --radius-sm: 6px;
-  --radius-md: 10px;
-  --radius-lg: 16px;
+  /* Radii — generous + cozy */
+  --radius-sm:   8px;
+  --radius-md:   14px;
+  --radius-lg:   22px;
   --radius-full: 9999px;
 
   /* Elevation */
   --shadow-dropdown: 0 8px 24px rgba(0, 0, 0, 0.3);
-  --shadow-modal:    0 16px 48px rgba(0, 0, 0, 0.5);
+  --shadow-modal:    0 30px 80px rgba(0, 0, 0, 0.45);
 
   /* Typography */
-  --font-sans: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto,
+  --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto,
                Helvetica, Arial, sans-serif;
+  --font-display: 'Fraunces', 'Inter', Georgia, serif;
   --font-mono: ui-monospace, SFMono-Regular, 'SF Mono', Menlo,
                Consolas, 'Liberation Mono', monospace;
   --font-size-xs: 12px;
-  --font-size-sm: 14px;
-  --font-size-md: 16px;
+  --font-size-sm: 13px;
+  --font-size-md: 15px;
   --font-size-lg: 18px;
   --font-size-xl: 22px;
   --font-size-2xl: 28px;
 
   /* Navbar */
-  --nav-height: 64px;
-  --bottom-nav-height: 60px;
+  --nav-height: 60px;
+  --bottom-nav-height: 72px;
 
   /* Motion */
   --transition-fast: 0.15s ease;
@@ -75,11 +84,14 @@
 html,
 body {
   height: 100%;
-  background-color: var(--color-bg);
+  background:
+    radial-gradient(1100px 600px at 80% -10%, rgba(28, 42, 37, 0.4), transparent 60%),
+    radial-gradient(900px 500px at 0% 100%, rgba(44, 66, 57, 0.4), transparent 55%),
+    var(--color-bg-outer);
   color: var(--color-text-primary);
   font-family: var(--font-sans);
   font-size: var(--font-size-md);
-  line-height: 1.5;
+  line-height: 1.55;
   -webkit-font-smoothing: antialiased;
   overscroll-behavior: none;
 }
@@ -88,6 +100,22 @@ body {
   height: 100%;
   display: flex;
   flex-direction: column;
+  align-items: center;
+  background: var(--color-bg);
+  width: 100%;
+  max-width: 480px;
+  margin: 0 auto;
+}
+
+@media (min-width: 600px) {
+  #root {
+    margin: 24px auto;
+    min-height: calc(100vh - 48px);
+    border-radius: 28px;
+    border: 1px solid var(--color-border-soft);
+    overflow: hidden;
+    box-shadow: var(--shadow-modal);
+  }
 }
 
 a {

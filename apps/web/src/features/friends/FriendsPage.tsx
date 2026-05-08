@@ -1,8 +1,10 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import * as stylex from '@stylexjs/stylex';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { api } from '../../lib/api.js';
+import { avatarColor } from '../../lib/avatarColor.js';
 import { colors, font, radii, spacing } from '../../styles/tokens.stylex.js';
+import { StationHead } from '../../components/StationHead.js';
 import type { AddFriendBody, FriendDTO } from '@orbit/shared';
 
 type Tab = 'friends' | 'requests';
@@ -10,6 +12,7 @@ type Tab = 'friends' | 'requests';
 export function FriendsPage() {
   const [tab, setTab] = useState<Tab>('friends');
   const [code, setCode] = useState('');
+  const [flash, setFlash] = useState<string | null>(null);
   const qc = useQueryClient();
 
   const friendsQ = useQuery<FriendDTO[]>({
@@ -25,7 +28,8 @@ export function FriendsPage() {
   const addMutation = useMutation({
     mutationFn: (body: AddFriendBody) =>
       api.post<FriendDTO>('/friends/add', body).then((r) => r.data),
-    onSuccess: () => {
+    onSuccess: (_, body) => {
+      setFlash(`Request sent to ${body.friendCode}`);
       setCode('');
       void qc.invalidateQueries({ queryKey: ['friend-requests'] });
     },
@@ -40,38 +44,54 @@ export function FriendsPage() {
     },
   });
 
+  // Auto-dismiss the success flash
+  useEffect(() => {
+    if (!flash) return;
+    const t = setTimeout(() => setFlash(null), 2200);
+    return () => clearTimeout(t);
+  }, [flash]);
+
+  const friendCount = friendsQ.data?.length ?? 0;
   const pendingCount = requestsQ.data?.length ?? 0;
+  const errorMsg = (addMutation.error as { response?: { data?: { error?: string } } })?.response
+    ?.data?.error;
 
   return (
     <div {...stylex.props(styles.page)}>
-      {/* Add friend */}
-      <div {...stylex.props(styles.addCard)}>
-        <p {...stylex.props(styles.addLabel)}>Add by friend code</p>
-        <div {...stylex.props(styles.addRow)}>
-          <input
-            value={code}
-            onChange={(e) => setCode(e.target.value.toUpperCase())}
-            placeholder="ABC123"
-            maxLength={6}
-            {...stylex.props(styles.input)}
-          />
-          <button
-            onClick={() => addMutation.mutate({ friendCode: code })}
-            disabled={code.length < 6 || addMutation.isPending}
-            {...stylex.props(styles.addBtn)}
-          >
-            {addMutation.isPending ? '…' : 'Add'}
-          </button>
-        </div>
-        {addMutation.isError && (
-          <p {...stylex.props(styles.error)}>
-            {(addMutation.error as { response?: { data?: { error?: string } } })?.response?.data
-              ?.error ?? 'Something went wrong'}
+      <StationHead
+        eyebrow="People"
+        title="Your circle"
+        sub={`${friendCount} ${friendCount === 1 ? 'friend' : 'friends'} · ${pendingCount} pending`}
+      />
+
+      {/* Add friend card */}
+      <div {...stylex.props(styles.section)}>
+        <article {...stylex.props(styles.addCard)}>
+          <h2 {...stylex.props(styles.addTitle)}>Add a friend</h2>
+          <p {...stylex.props(styles.addHint)}>
+            Type their friend code — they'll get a request.
           </p>
-        )}
-        {addMutation.isSuccess && (
-          <p {...stylex.props(styles.success)}>Request sent!</p>
-        )}
+          <div {...stylex.props(styles.addRow)}>
+            <input
+              value={code}
+              onChange={(e) => setCode(e.target.value.toUpperCase().slice(0, 6))}
+              placeholder="ABC123"
+              maxLength={6}
+              {...stylex.props(styles.input)}
+            />
+            <button
+              onClick={() => addMutation.mutate({ friendCode: code })}
+              disabled={code.length < 6 || addMutation.isPending}
+              {...stylex.props(styles.sendBtn)}
+            >
+              {addMutation.isPending ? '…' : 'Send'}
+            </button>
+          </div>
+          {addMutation.isError && (
+            <p {...stylex.props(styles.errorMsg)}>{errorMsg ?? 'Something went wrong'}</p>
+          )}
+          {flash && <p {...stylex.props(styles.flashMsg)}>✓ {flash}</p>}
+        </article>
       </div>
 
       {/* Tabs */}
@@ -81,12 +101,18 @@ export function FriendsPage() {
           {...stylex.props(styles.tab, tab === 'friends' && styles.tabActive)}
         >
           Friends
+          <span {...stylex.props(styles.count, tab === 'friends' && styles.countActive)}>
+            {friendCount}
+          </span>
         </button>
         <button
           onClick={() => setTab('requests')}
           {...stylex.props(styles.tab, tab === 'requests' && styles.tabActive)}
         >
-          Requests{pendingCount > 0 ? ` (${pendingCount})` : ''}
+          Pending
+          <span {...stylex.props(styles.count, tab === 'requests' && styles.countActive)}>
+            {pendingCount}
+          </span>
         </button>
       </div>
 
@@ -94,12 +120,16 @@ export function FriendsPage() {
       {tab === 'friends' && (
         <div {...stylex.props(styles.list)}>
           {friendsQ.isLoading && <p {...stylex.props(styles.muted)}>Loading…</p>}
-          {friendsQ.data?.length === 0 && (
-            <p {...stylex.props(styles.muted)}>No friends yet. Add one using their friend code.</p>
+          {!friendsQ.isLoading && friendCount === 0 && (
+            <div {...stylex.props(styles.empty)}>
+              <span {...stylex.props(styles.emptyGlyph)}>✿</span>
+              <span {...stylex.props(styles.emptyTitle)}>No friends yet</span>
+              <span {...stylex.props(styles.emptySub)}>
+                Share your code or add one above to start your circle.
+              </span>
+            </div>
           )}
-          {friendsQ.data?.map((f) => (
-            <FriendRow key={f.id} friend={f} />
-          ))}
+          {friendsQ.data?.map((f) => <FriendRow key={f.id} friend={f} />)}
         </div>
       )}
 
@@ -107,17 +137,20 @@ export function FriendsPage() {
       {tab === 'requests' && (
         <div {...stylex.props(styles.list)}>
           {requestsQ.isLoading && <p {...stylex.props(styles.muted)}>Loading…</p>}
-          {requestsQ.data?.length === 0 && (
-            <p {...stylex.props(styles.muted)}>No pending requests.</p>
+          {!requestsQ.isLoading && pendingCount === 0 && (
+            <div {...stylex.props(styles.empty)}>
+              <span {...stylex.props(styles.emptyGlyph)}>♡</span>
+              <span {...stylex.props(styles.emptyTitle)}>No pending requests</span>
+            </div>
           )}
           {requestsQ.data?.map((f) => (
-            <div key={f.id} {...stylex.props(styles.requestRow)}>
-              <Avatar name={f.user.name} avatar={f.user.avatar} />
-              <div {...stylex.props(styles.requestInfo)}>
-                <span {...stylex.props(styles.friendName)}>{f.user.name}</span>
-                <span {...stylex.props(styles.friendCode)}>{f.user.friendCode}</span>
+            <article key={f.id} {...stylex.props(styles.row)}>
+              <Avatar name={f.user.name} avatar={f.user.avatar} seed={f.user.id} />
+              <div {...stylex.props(styles.rowInfo)}>
+                <span {...stylex.props(styles.rowName)}>{f.user.name}</span>
+                <span {...stylex.props(styles.rowCode)}>wants to be friends</span>
               </div>
-              <div {...stylex.props(styles.requestActions)}>
+              <div {...stylex.props(styles.rowActions)}>
                 <button
                   onClick={() => respondMutation.mutate({ id: f.id, action: 'accept' })}
                   disabled={respondMutation.isPending}
@@ -133,7 +166,7 @@ export function FriendsPage() {
                   Decline
                 </button>
               </div>
-            </div>
+            </article>
           ))}
         </div>
       )}
@@ -141,23 +174,63 @@ export function FriendsPage() {
   );
 }
 
-function Avatar({ name, avatar }: { name: string; avatar: string | null }) {
-  return avatar ? (
-    <img src={avatar} alt={name} {...stylex.props(styles.avatar)} />
-  ) : (
-    <div {...stylex.props(styles.avatarFallback)}>{name.charAt(0).toUpperCase()}</div>
+function Avatar({
+  name,
+  avatar,
+  seed,
+  size = 40,
+}: {
+  name: string;
+  avatar: string | null;
+  seed: string;
+  size?: number;
+}) {
+  if (avatar) {
+    return (
+      <img
+        src={avatar}
+        alt={name}
+        style={{
+          width: size,
+          height: size,
+          borderRadius: 9999,
+          objectFit: 'cover',
+          flexShrink: 0,
+        }}
+      />
+    );
+  }
+  return (
+    <div
+      style={{
+        width: size,
+        height: size,
+        borderRadius: 9999,
+        backgroundColor: avatarColor(seed),
+        color: '#0c1411',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        fontSize: Math.round(size * 0.42),
+        fontWeight: 700,
+        fontFamily: 'var(--font-display)',
+        flexShrink: 0,
+      }}
+    >
+      {name.charAt(0).toUpperCase()}
+    </div>
   );
 }
 
 function FriendRow({ friend }: { friend: FriendDTO }) {
   return (
-    <div {...stylex.props(styles.friendRow)}>
-      <Avatar name={friend.user.name} avatar={friend.user.avatar} />
-      <div>
-        <p {...stylex.props(styles.friendName)}>{friend.user.name}</p>
-        <p {...stylex.props(styles.friendCode)}>{friend.user.friendCode}</p>
+    <article {...stylex.props(styles.row)}>
+      <Avatar name={friend.user.name} avatar={friend.user.avatar} seed={friend.user.id} />
+      <div {...stylex.props(styles.rowInfo)}>
+        <span {...stylex.props(styles.rowName)}>{friend.user.name}</span>
+        <span {...stylex.props(styles.rowCode)}>{friend.user.friendCode}</span>
       </div>
-    </div>
+    </article>
   );
 }
 
@@ -165,21 +238,32 @@ const styles = stylex.create({
   page: {
     display: 'flex',
     flexDirection: 'column',
-    gap: spacing.s4,
-    padding: spacing.s4,
+    paddingBottom: spacing.s8,
+  },
+  section: {
+    padding: `${spacing.s2} ${spacing.s4}`,
   },
   addCard: {
     backgroundColor: colors.surface,
-    border: `1px solid ${colors.border}`,
     borderRadius: radii.lg,
-    padding: spacing.s4,
+    padding: spacing.s5,
     display: 'flex',
     flexDirection: 'column',
-    gap: spacing.s3,
+    gap: spacing.s2,
   },
-  addLabel: {
+  addTitle: {
+    fontFamily: font.display,
+    fontSize: font.lg,
+    fontWeight: 600,
+    color: colors.textPrimary,
+    margin: 0,
+    letterSpacing: '-0.01em',
+  },
+  addHint: {
     fontSize: font.sm,
     color: colors.textSecondary,
+    margin: 0,
+    marginBottom: spacing.s2,
   },
   addRow: {
     display: 'flex',
@@ -187,141 +271,159 @@ const styles = stylex.create({
   },
   input: {
     flex: 1,
-    padding: `${spacing.s2} ${spacing.s3}`,
-    backgroundColor: colors.bg,
-    border: `1px solid ${colors.border}`,
+    padding: `${spacing.s3} ${spacing.s4}`,
+    backgroundColor: colors.surface2,
+    border: 'none',
     borderRadius: radii.md,
     color: colors.textPrimary,
-    fontSize: font.md,
-    fontFamily: 'monospace',
-    letterSpacing: '0.1em',
+    fontSize: font.lg,
+    fontFamily: font.mono,
+    fontWeight: 600,
+    letterSpacing: '0.18em',
+    textAlign: 'center',
     textTransform: 'uppercase',
+    outline: 'none',
   },
-  addBtn: {
-    padding: `${spacing.s2} ${spacing.s4}`,
+  sendBtn: {
+    padding: `${spacing.s2} ${spacing.s5}`,
     backgroundColor: colors.accent,
     color: colors.fgOnAccent,
     border: 'none',
-    borderRadius: radii.md,
-    fontSize: font.md,
+    borderRadius: radii.full,
+    fontSize: font.sm,
     fontWeight: 600,
     cursor: 'pointer',
+    ':disabled': { opacity: 0.4, cursor: 'not-allowed' },
   },
-  error: {
+  errorMsg: {
     fontSize: font.sm,
     color: colors.danger,
+    marginTop: spacing.s2,
   },
-  success: {
+  flashMsg: {
     fontSize: font.sm,
-    color: colors.success,
+    color: colors.accentBright,
+    fontWeight: 500,
+    marginTop: spacing.s2,
   },
   tabs: {
     display: 'flex',
-    gap: spacing.s2,
-    borderBottom: `1px solid ${colors.border}`,
+    gap: '6px',
+    padding: `${spacing.s2} ${spacing.s4} ${spacing.s3}`,
   },
   tab: {
     padding: `${spacing.s2} ${spacing.s4}`,
-    fontSize: font.md,
-    color: colors.textSecondary,
-    background: 'none',
     border: 'none',
-    borderBottom: '2px solid transparent',
+    background: 'transparent',
+    color: colors.textSecondary,
+    fontSize: font.sm,
+    fontWeight: 500,
+    borderRadius: radii.full,
+    display: 'flex',
+    alignItems: 'center',
+    gap: '6px',
     cursor: 'pointer',
-    marginBottom: '-1px',
   },
   tabActive: {
-    color: colors.accent,
-    borderBottomColor: colors.accent,
+    backgroundColor: colors.surface,
+    color: colors.textPrimary,
+  },
+  count: {
+    fontSize: '11px',
+    backgroundColor: colors.surface2,
+    color: colors.textSecondary,
+    padding: '1px 7px',
+    borderRadius: radii.full,
+    fontWeight: 600,
+  },
+  countActive: {
+    backgroundColor: colors.accent,
+    color: colors.fgOnAccent,
   },
   list: {
     display: 'flex',
     flexDirection: 'column',
     gap: spacing.s2,
+    padding: `0 ${spacing.s4}`,
   },
   muted: {
     color: colors.textSecondary,
     fontSize: font.sm,
     textAlign: 'center',
-    paddingTop: spacing.s6,
+    padding: spacing.s6,
   },
-  friendRow: {
-    display: 'flex',
-    alignItems: 'center',
-    gap: spacing.s3,
-    padding: spacing.s3,
-    backgroundColor: colors.surface,
-    border: `1px solid ${colors.border}`,
-    borderRadius: radii.md,
-  },
-  requestRow: {
-    display: 'flex',
-    alignItems: 'center',
-    gap: spacing.s3,
-    padding: spacing.s3,
-    backgroundColor: colors.surface,
-    border: `1px solid ${colors.border}`,
-    borderRadius: radii.md,
-  },
-  requestInfo: {
-    flex: 1,
+  empty: {
+    textAlign: 'center',
+    padding: `${spacing.s8} ${spacing.s5}`,
+    color: colors.textSecondary,
     display: 'flex',
     flexDirection: 'column',
     gap: spacing.s1,
   },
-  requestActions: {
-    display: 'flex',
-    gap: spacing.s2,
+  emptyGlyph: {
+    fontSize: '32px',
+    marginBottom: spacing.s2,
   },
-  avatar: {
-    width: '40px',
-    height: '40px',
-    borderRadius: radii.full,
-    objectFit: 'cover',
-    flexShrink: 0,
+  emptyTitle: {
+    fontFamily: font.display,
+    fontSize: font.lg,
+    fontWeight: 600,
+    color: colors.textPrimary,
   },
-  avatarFallback: {
-    width: '40px',
-    height: '40px',
-    borderRadius: radii.full,
-    backgroundColor: colors.accent,
-    color: colors.fgOnAccent,
+  emptySub: {
+    fontSize: font.sm,
+    color: colors.textSecondary,
+  },
+  row: {
     display: 'flex',
     alignItems: 'center',
-    justifyContent: 'center',
-    fontSize: font.md,
-    fontWeight: 700,
-    flexShrink: 0,
+    gap: spacing.s3,
+    padding: spacing.s3,
+    backgroundColor: colors.surface,
+    borderRadius: radii.md,
   },
-  friendName: {
+  rowInfo: {
+    flex: 1,
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '2px',
+    minWidth: 0,
+  },
+  rowName: {
     fontSize: font.md,
     fontWeight: 600,
     color: colors.textPrimary,
   },
-  friendCode: {
+  rowCode: {
     fontSize: font.xs,
     color: colors.textSecondary,
-    fontFamily: 'monospace',
+    fontFamily: font.mono,
     letterSpacing: '0.08em',
   },
+  rowActions: {
+    display: 'flex',
+    gap: spacing.s2,
+  },
   acceptBtn: {
-    padding: `${spacing.s1} ${spacing.s3}`,
-    backgroundColor: colors.success,
+    padding: `${spacing.s2} ${spacing.s4}`,
+    backgroundColor: colors.accent,
     color: colors.fgOnAccent,
     border: 'none',
-    borderRadius: radii.md,
+    borderRadius: radii.full,
     fontSize: font.sm,
     fontWeight: 600,
     cursor: 'pointer',
+    ':disabled': { opacity: 0.4 },
   },
   declineBtn: {
-    padding: `${spacing.s1} ${spacing.s3}`,
+    padding: `${spacing.s2} ${spacing.s4}`,
     backgroundColor: 'transparent',
-    color: colors.danger,
-    border: `1px solid ${colors.danger}`,
-    borderRadius: radii.md,
+    color: colors.textSecondary,
+    border: 'none',
+    borderRadius: radii.full,
     fontSize: font.sm,
-    fontWeight: 600,
+    fontWeight: 500,
     cursor: 'pointer',
+    ':hover': { color: colors.danger },
   },
 });

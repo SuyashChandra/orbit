@@ -199,7 +199,7 @@ function CustomExerciseForm({ onClose, onSaved }: { onClose: () => void; onSaved
         disabled={mutation.isPending || !form.name.trim() || !form.category.trim()}
         {...stylex.props(styles.submitBtn)}
       >
-        {mutation.isPending ? 'Saving…' : 'Create Exercise'}
+        {mutation.isPending ? 'Saving…' : 'Save'}
       </button>
     </Modal>
   );

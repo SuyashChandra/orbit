@@ -1,13 +1,15 @@
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import * as stylex from '@stylexjs/stylex';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { api } from '../../lib/api.js';
+import { avatarColor } from '../../lib/avatarColor.js';
 import { colors, font, radii, spacing } from '../../styles/tokens.stylex.js';
 import { useAuthStore } from '../auth/authStore.js';
 import type { PostDTO, CommentDTO } from '@orbit/shared';
 import { REACTION_TYPES } from '@orbit/shared';
 
-const REACTION_EMOJI: Record<string, string> = { like: '👍', fire: '🔥', strong: '💪' };
+// Display only — wire-protocol reaction types stay 'like' | 'fire' | 'strong'.
+const REACTION_GLYPH: Record<string, string> = { like: '♡', fire: '✦', strong: '◐' };
 
 interface Props {
   post: PostDTO;
@@ -20,6 +22,23 @@ export function PostCard({ post, onDelete }: Props) {
   const [showComments, setShowComments] = useState(false);
   const [commentText, setCommentText] = useState('');
   const [lightboxImg, setLightboxImg] = useState<string | null>(null);
+  const [menuOpen, setMenuOpen] = useState(false);
+  const menuRef = useRef<HTMLDivElement>(null);
+
+  // Close the kebab menu on outside click / Escape
+  useEffect(() => {
+    if (!menuOpen) return;
+    const onDocClick = (e: MouseEvent) => {
+      if (menuRef.current && !menuRef.current.contains(e.target as Node)) setMenuOpen(false);
+    };
+    const onEsc = (e: KeyboardEvent) => { if (e.key === 'Escape') setMenuOpen(false); };
+    document.addEventListener('mousedown', onDocClick);
+    document.addEventListener('keydown', onEsc);
+    return () => {
+      document.removeEventListener('mousedown', onDocClick);
+      document.removeEventListener('keydown', onEsc);
+    };
+  }, [menuOpen]);
 
   const reactMutation = useMutation({
     mutationFn: async (type: string) => {
@@ -68,6 +87,7 @@ export function PostCard({ post, onDelete }: Props) {
   const timestamp = new Date(post.createdAt).toLocaleDateString('en-US', {
     month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit',
   });
+  const totalReactions = post.reactions.reduce((s, r) => s + r.count, 0);
 
   return (
     <article {...stylex.props(styles.card)}>
@@ -76,19 +96,51 @@ export function PostCard({ post, onDelete }: Props) {
         <div {...stylex.props(styles.avatarWrap)}>
           {post.author.avatar
             ? <img src={post.author.avatar} alt="" {...stylex.props(styles.avatar)} />
-            : <div {...stylex.props(styles.avatarFallback)}>{post.author.name[0]?.toUpperCase()}</div>
+            : (
+              <div
+                {...stylex.props(styles.avatarFallback)}
+                style={{ backgroundColor: avatarColor(post.author.id) }}
+              >
+                {post.author.name[0]?.toUpperCase()}
+              </div>
+            )
           }
         </div>
         <div {...stylex.props(styles.authorInfo)}>
           <span {...stylex.props(styles.authorName)}>{post.author.name}</span>
           <span {...stylex.props(styles.timestamp)}>{timestamp}</span>
         </div>
-        {isOwn && (
+        <div {...stylex.props(styles.menuWrap)} ref={menuRef}>
           <button
-            onClick={() => { if (confirm('Delete this post?')) deleteMutation.mutate(); }}
-            {...stylex.props(styles.deleteBtn)}
-          >✕</button>
-        )}
+            onClick={() => setMenuOpen((v) => !v)}
+            {...stylex.props(styles.menuBtn)}
+            aria-label="More"
+          >
+            ⋯
+          </button>
+          {menuOpen && (
+            <div {...stylex.props(styles.menu)}>
+              {isOwn ? (
+                <button
+                  onClick={() => {
+                    setMenuOpen(false);
+                    if (confirm('Delete this post?')) deleteMutation.mutate();
+                  }}
+                  {...stylex.props(styles.menuItem, styles.menuItemDanger)}
+                >
+                  Delete post
+                </button>
+              ) : (
+                <button
+                  onClick={() => setMenuOpen(false)}
+                  {...stylex.props(styles.menuItem)}
+                >
+                  Hide
+                </button>
+              )}
+            </div>
+          )}
+        </div>
       </div>
 
       {/* Content */}
@@ -148,16 +200,24 @@ export function PostCard({ post, onDelete }: Props) {
                 onClick={() => reactMutation.mutate(type)}
                 {...stylex.props(styles.reactionBtn, active && styles.reactionBtnActive)}
               >
-                {REACTION_EMOJI[type]} {summary ? summary.count : ''}
+                <span {...stylex.props(styles.reactionGlyph)}>{REACTION_GLYPH[type]}</span>
+                {summary ? summary.count : null}
               </button>
             );
           })}
         </div>
+        <span {...stylex.props(styles.spacer)} />
+        {totalReactions > 0 && (
+          <span {...stylex.props(styles.totalCount)}>
+            {totalReactions} {totalReactions === 1 ? 'reaction' : 'reactions'}
+          </span>
+        )}
         <button
           onClick={() => setShowComments((v) => !v)}
           {...stylex.props(styles.commentToggle)}
         >
-          💬 {post.commentCount > 0 ? post.commentCount : ''}
+          <span {...stylex.props(styles.reactionGlyph)}>◌</span>
+          {post.commentCount > 0 ? post.commentCount : 'Reply'}
         </button>
       </div>
 
@@ -212,15 +272,15 @@ export function PostCard({ post, onDelete }: Props) {
 const styles = stylex.create({
   card: {
     backgroundColor: colors.surface,
-    border: `1px solid ${colors.border}`,
     borderRadius: radii.lg,
     overflow: 'hidden',
+    padding: `${spacing.s5} ${spacing.s5} ${spacing.s4}`,
   },
   header: {
     display: 'flex',
     alignItems: 'center',
     gap: spacing.s3,
-    padding: `${spacing.s4} ${spacing.s4} ${spacing.s2}`,
+    marginBottom: spacing.s3,
   },
   avatarWrap: { flexShrink: 0 },
   avatar: {
@@ -242,28 +302,70 @@ const styles = stylex.create({
     fontWeight: 700,
   },
   authorInfo: { flex: 1, display: 'flex', flexDirection: 'column', gap: '2px' },
-  authorName: { fontSize: font.md, fontWeight: 700, color: colors.textPrimary },
-  timestamp: { fontSize: font.xs, color: colors.textSecondary },
-  deleteBtn: {
-    background: 'none',
+  authorName: { fontSize: font.md, fontWeight: 600, color: colors.textPrimary },
+  timestamp: { fontSize: font.xs, color: colors.textDeep },
+  menuWrap: { position: 'relative' },
+  menuBtn: {
+    width: '32px',
+    height: '32px',
+    borderRadius: radii.full,
+    background: 'transparent',
     border: 'none',
-    color: colors.textSecondary,
-    fontSize: font.sm,
+    color: colors.textDeep,
+    fontSize: font.lg,
     cursor: 'pointer',
-    padding: spacing.s1,
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    transition: 'background 0.15s',
+    ':hover': { backgroundColor: colors.surface2 },
+  },
+  menu: {
+    position: 'absolute',
+    top: 'calc(100% + 4px)',
+    right: 0,
+    backgroundColor: colors.surface2,
+    borderRadius: radii.md,
+    boxShadow: '0 8px 24px rgba(0,0,0,0.3)',
+    overflow: 'hidden',
+    minWidth: '140px',
+    zIndex: 50,
+  },
+  menuItem: {
+    display: 'block',
+    width: '100%',
+    padding: `${spacing.s3} ${spacing.s4}`,
+    background: 'transparent',
+    border: 'none',
+    color: colors.textPrimary,
+    fontSize: font.sm,
+    textAlign: 'left',
+    cursor: 'pointer',
+    ':hover': { backgroundColor: colors.surfaceRaised },
+  },
+  menuItemDanger: { color: colors.danger },
+  spacer: { flex: 1 },
+  totalCount: {
+    fontSize: font.xs,
+    color: colors.textDeep,
+    marginRight: spacing.s2,
+  },
+  reactionGlyph: {
+    fontSize: '15px',
+    lineHeight: 1,
   },
   content: {
-    padding: `${spacing.s2} ${spacing.s4} ${spacing.s3}`,
     fontSize: font.md,
     color: colors.textPrimary,
-    lineHeight: '1.5',
+    lineHeight: '1.55',
     whiteSpace: 'pre-wrap',
+    margin: 0,
   },
   imagesGrid: {
     display: 'grid',
     gridTemplateColumns: 'repeat(2, 1fr)',
     gap: '2px',
-    margin: `0 ${spacing.s4} ${spacing.s3}`,
+    marginTop: spacing.s3,
     borderRadius: radii.md,
     overflow: 'hidden',
   },
@@ -286,11 +388,10 @@ const styles = stylex.create({
     display: 'flex',
     alignItems: 'center',
     gap: spacing.s2,
-    margin: `0 ${spacing.s4} ${spacing.s3}`,
-    padding: `${spacing.s2} ${spacing.s3}`,
-    backgroundColor: colors.bg,
+    marginTop: spacing.s3,
+    padding: `${spacing.s3} ${spacing.s4}`,
+    backgroundColor: colors.bgOuter,
     borderRadius: radii.md,
-    border: `1px solid ${colors.border}`,
   },
   linkedIcon: { fontSize: font.md },
   linkedText: { fontSize: font.sm, color: colors.textPrimary, fontWeight: 500 },
@@ -299,26 +400,27 @@ const styles = stylex.create({
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'space-between',
-    padding: `${spacing.s2} ${spacing.s3}`,
-    borderTop: `1px solid ${colors.border}`,
+    marginTop: spacing.s3,
   },
   reactions: { display: 'flex', gap: spacing.s1 },
   reactionBtn: {
-    background: 'none',
-    border: `1px solid ${colors.border}`,
+    background: 'transparent',
+    border: 'none',
     borderRadius: radii.full,
-    padding: `${spacing.s1} ${spacing.s3}`,
+    padding: `${spacing.s2} ${spacing.s3}`,
     fontSize: font.sm,
+    fontWeight: 500,
     cursor: 'pointer',
     color: colors.textSecondary,
     display: 'flex',
     alignItems: 'center',
-    gap: '4px',
+    gap: '5px',
+    transition: 'background 0.15s, color 0.15s',
   },
   reactionBtnActive: {
-    backgroundColor: colors.accent,
-    borderColor: colors.accent,
-    color: colors.fgOnAccent,
+    backgroundColor: colors.accentSoft,
+    color: colors.accentBright,
+    fontWeight: 600,
   },
   commentToggle: {
     background: 'none',
@@ -329,8 +431,9 @@ const styles = stylex.create({
     padding: `${spacing.s1} ${spacing.s2}`,
   },
   commentsSection: {
-    borderTop: `1px solid ${colors.border}`,
-    padding: `${spacing.s3} ${spacing.s4}`,
+    marginTop: spacing.s4,
+    paddingTop: spacing.s3,
+    borderTop: `1px solid ${colors.borderSoft}`,
     display: 'flex',
     flexDirection: 'column',
     gap: spacing.s3,
@@ -358,11 +461,12 @@ const styles = stylex.create({
   commentField: {
     flex: 1,
     padding: `${spacing.s2} ${spacing.s3}`,
-    backgroundColor: colors.bg,
-    border: `1px solid ${colors.border}`,
+    backgroundColor: colors.bgOuter,
+    border: 'none',
     borderRadius: radii.md,
     color: colors.textPrimary,
     fontSize: font.sm,
+    outline: 'none',
   },
   commentSubmit: {
     padding: `${spacing.s2} ${spacing.s3}`,

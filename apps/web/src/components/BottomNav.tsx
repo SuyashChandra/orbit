@@ -1,13 +1,13 @@
 import * as stylex from '@stylexjs/stylex';
 import { NavLink } from 'react-router';
-import { colors, font } from '../styles/tokens.stylex.js';
+import { colors, radii } from '../styles/tokens.stylex.js';
 
 const NAV_ITEMS = [
-  { to: '/', label: 'Feed', icon: '⚡' },
-  { to: '/jobs', label: 'Jobs', icon: '💼' },
-  { to: '/gym', label: 'Gym', icon: '🏋️' },
-  { to: '/badminton', label: 'Court', icon: '🏸' },
-  { to: '/friends', label: 'Friends', icon: '👥' },
+  { to: '/',          label: 'Home',   glyph: '☾' },
+  { to: '/jobs',      label: 'Work',   glyph: '✦' },
+  { to: '/gym',       label: 'Move',   glyph: '◐' },
+  { to: '/badminton', label: 'Play',   glyph: '◉' },
+  { to: '/friends',   label: 'People', glyph: '✿' },
 ] as const;
 
 export function BottomNav() {
@@ -17,10 +17,9 @@ export function BottomNav() {
         <NavLink key={item.to} to={item.to} end={item.to === '/'}>
           {({ isActive }) => (
             <div {...stylex.props(styles.item, isActive && styles.itemActive)}>
-              <span {...stylex.props(styles.icon)}>{item.icon}</span>
-              <span {...stylex.props(styles.label, isActive && styles.labelActive)}>
-                {item.label}
-              </span>
+              <span {...stylex.props(styles.glyph)}>{item.glyph}</span>
+              <span {...stylex.props(styles.label)}>{item.label}</span>
+              <span {...stylex.props(styles.pip, isActive && styles.pipActive)} />
             </div>
           )}
         </NavLink>
@@ -38,36 +37,49 @@ const styles = stylex.create({
     width: '100%',
     maxWidth: '480px',
     height: 'var(--bottom-nav-height)',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'space-around',
-    backgroundColor: colors.bg,
-    borderTop: `1px solid ${colors.border}`,
+    display: 'grid',
+    gridTemplateColumns: 'repeat(5, 1fr)',
+    backgroundColor: 'rgba(20, 32, 28, 0.85)',
+    backdropFilter: 'blur(20px)',
+    WebkitBackdropFilter: 'blur(20px)',
     zIndex: 100,
-    paddingBottom: 'env(safe-area-inset-bottom)',
+    paddingBottom: 'calc(env(safe-area-inset-bottom) + 6px)',
   },
   item: {
     display: 'flex',
     flexDirection: 'column',
     alignItems: 'center',
-    gap: '2px',
-    padding: '4px 8px',
-    opacity: 0.5,
-    transition: 'opacity 0.15s',
+    justifyContent: 'center',
+    gap: '4px',
+    padding: '6px 0',
+    position: 'relative',
+    color: colors.textDeep,
+    transition: 'color 0.15s',
+    height: '100%',
   },
   itemActive: {
-    opacity: 1,
+    color: colors.textPrimary,
   },
-  icon: {
-    fontSize: '20px',
+  glyph: {
+    fontSize: '22px',
     lineHeight: 1,
   },
   label: {
-    fontSize: font.xs,
-    color: colors.textSecondary,
+    fontSize: '10px',
+    fontWeight: 500,
   },
-  labelActive: {
-    color: colors.accent,
-    fontWeight: 600,
+  pip: {
+    position: 'absolute',
+    bottom: '2px',
+    width: '4px',
+    height: '4px',
+    borderRadius: radii.full,
+    backgroundColor: colors.accent,
+    opacity: 0,
+    transition: 'opacity 0.15s',
+  },
+  pipActive: {
+    opacity: 1,
   },
 });
+
