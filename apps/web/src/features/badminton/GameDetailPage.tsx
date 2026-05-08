@@ -104,7 +104,7 @@ export function GameDetailPage() {
 
       {/* Date */}
       <div className="flex flex-col gap-1">
-        <p className="text-[1.75rem] font-extrabold text-fg leading-[1.2]">
+        <p className="font-display text-[1.75rem] font-semibold text-fg leading-[1.2]">
           {scheduledAt.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })}
         </p>
         <p className="text-lg text-fg-muted">
@@ -168,8 +168,7 @@ export function GameDetailPage() {
             <button
               onClick={() => respondMutation.mutate('accepted')}
               disabled={respondMutation.isPending}
-              className="flex-1 p-3 border-none rounded-md text-on-accent text-base font-semibold cursor-pointer"
-              style={{ backgroundColor: '#10b981' }}
+              className="flex-1 p-3 bg-accent border-none rounded-md text-on-accent text-base font-semibold cursor-pointer"
             >
               Accept
             </button>
@@ -232,15 +231,15 @@ export function GameDetailPage() {
       {showInvite && (
         <div
           className="fixed inset-0 z-[200] flex items-end"
-          style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}
+          style={{ backgroundColor: 'rgba(8, 16, 12, 0.6)', backdropFilter: 'blur(4px)' }}
           onClick={() => setShowInvite(false)}
         >
           <div
-            className="w-full max-w-[480px] mx-auto bg-bg p-4 flex flex-col gap-3 max-h-[70dvh] overflow-y-auto"
-            style={{ borderRadius: 'var(--radius-lg) var(--radius-lg) 0 0' }}
+            className="w-full max-w-[480px] mx-auto bg-surface p-4 flex flex-col gap-3 max-h-[70dvh] overflow-y-auto"
+            style={{ borderRadius: '28px 28px 0 0' }}
             onClick={(e) => e.stopPropagation()}
           >
-            <p className="text-lg font-bold text-fg">Invite a Friend</p>
+            <p className="font-display text-lg font-semibold text-fg">Invite a Friend</p>
             {friendsQ.isLoading && <p className="text-fg-muted text-sm text-center pt-4">Loading…</p>}
             {invitableFriends.length === 0 && !friendsQ.isLoading && (
               <p className="text-fg-muted text-sm text-center pt-4">No friends available to invite.</p>

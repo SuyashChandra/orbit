@@ -77,7 +77,7 @@ export function WorkoutBuilder({ workout, onBack }: { workout: WorkoutDTO; onBac
     <div className="flex flex-col gap-4">
       <div className="flex items-center gap-3">
         <button onClick={onBack} className="bg-transparent border-none text-accent text-base cursor-pointer p-0">← Back</button>
-        <h3 className="text-lg font-bold text-fg">{current.name}</h3>
+        <h3 className="font-display text-lg font-semibold text-fg">{current.name}</h3>
       </div>
 
       {sorted.length === 0 && (
@@ -86,7 +86,7 @@ export function WorkoutBuilder({ workout, onBack }: { workout: WorkoutDTO; onBac
 
       <div className="flex flex-col gap-2">
         {sorted.map((we, idx) => (
-          <div key={we.id} className="flex items-center gap-2 py-3 px-3 bg-surface border border-border rounded-md">
+          <div key={we.id} className="flex items-center gap-2 py-3 px-3 bg-surface rounded-md">
             <div className="flex flex-col gap-0.5">
               <button
                 onClick={() => moveUp(idx)}
@@ -124,12 +124,12 @@ export function WorkoutBuilder({ workout, onBack }: { workout: WorkoutDTO; onBac
       {showPicker && (
         <div
           className="fixed inset-0 z-[200] flex items-end"
-          style={{ backgroundColor: 'rgba(0,0,0,0.6)' }}
+          style={{ backgroundColor: 'rgba(8, 16, 12, 0.6)', backdropFilter: 'blur(4px)' }}
           onClick={() => setShowPicker(false)}
         >
           <div
-            className="w-full max-w-[480px] mx-auto bg-bg flex flex-col max-h-[75dvh]"
-            style={{ borderRadius: 'var(--radius-lg) var(--radius-lg) 0 0' }}
+            className="w-full max-w-[480px] mx-auto bg-surface flex flex-col max-h-[75dvh]"
+            style={{ borderRadius: '28px 28px 0 0' }}
             onClick={(e) => e.stopPropagation()}
           >
             <div className="flex gap-2 p-4 border-b border-border shrink-0">

@@ -82,6 +82,7 @@ export function JobDetailPage() {
   if (jobQ.isLoading) return <div className="flex flex-col gap-4 p-4 pb-12"><p className="text-fg-muted text-sm">Loading…</p></div>;
   if (!job) return <div className="flex flex-col gap-4 p-4 pb-12"><p className="text-fg-muted text-sm">Not found.</p></div>;
 
+
   const linkedIds = new Set(job.resumes.map((r) => r.id));
   const availableResumes = resumesQ.data?.filter((r) => !linkedIds.has(r.id)) ?? [];
 
@@ -114,7 +115,7 @@ export function JobDetailPage() {
         onStartEdit={() => setEditingField('companyName')}
         onSave={(v) => updateMutation.mutate({ companyName: v })}
         onCancel={() => setEditingField(null)}
-        className="text-[1.75rem] font-extrabold text-fg cursor-pointer leading-[1.2]"
+        className="font-display text-[1.75rem] font-semibold text-fg cursor-pointer leading-[1.2]"
       />
       <EditableField
         label="Job Title"
@@ -206,15 +207,15 @@ export function JobDetailPage() {
       {showResumePicker && (
         <div
           className="fixed inset-0 z-[200] flex items-end"
-          style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}
+          style={{ backgroundColor: 'rgba(8, 16, 12, 0.6)', backdropFilter: 'blur(4px)' }}
           onClick={() => setShowResumePicker(false)}
         >
           <div
-            className="w-full max-w-[480px] mx-auto bg-bg p-4 flex flex-col gap-3 max-h-[60dvh] overflow-y-auto"
-            style={{ borderRadius: 'var(--radius-lg) var(--radius-lg) 0 0' }}
+            className="w-full max-w-[480px] mx-auto bg-surface p-4 flex flex-col gap-3 max-h-[60dvh] overflow-y-auto"
+            style={{ borderRadius: '28px 28px 0 0' }}
             onClick={(e) => e.stopPropagation()}
           >
-            <h3 className="text-lg font-bold text-fg">Link a Resume</h3>
+            <h3 className="font-display text-lg font-semibold text-fg">Link a Resume</h3>
             {availableResumes.length === 0 ? (
               <p className="text-fg-muted text-sm">No resumes available. Upload one in the Jobs tab.</p>
             ) : (

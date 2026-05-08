@@ -89,12 +89,12 @@ export function CreatePostModal({ onClose }: Props) {
   return (
     <div
       className="fixed inset-0 flex items-end justify-center z-[200]"
-      style={{ backgroundColor: 'rgba(0,0,0,0.6)' }}
+      style={{ backgroundColor: 'rgba(8, 16, 12, 0.6)', backdropFilter: 'blur(4px)' }}
       onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}
     >
-      <div className="w-full max-w-[600px] bg-surface flex flex-col max-h-[90vh] overflow-hidden rounded-t-lg">
+      <div className="w-full max-w-[600px] bg-surface flex flex-col max-h-[90vh] overflow-hidden" style={{ borderRadius: '28px 28px 0 0' }}>
         <div className="flex items-center justify-between py-4 px-4 pb-3 border-b border-border">
-          <h3 className="text-lg font-bold text-fg">New Post</h3>
+          <h3 className="font-display text-lg font-semibold text-fg">New Post</h3>
           <button onClick={onClose} className="bg-transparent border-none text-fg-muted text-base cursor-pointer p-1">✕</button>
         </div>
 
@@ -196,17 +196,17 @@ export function CreatePostModal({ onClose }: Props) {
             <button
               onClick={() => fileRef.current?.click()}
               disabled={images.length >= 4}
-              className="bg-transparent border border-border rounded-md py-2 px-3 text-base cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed"
+              className="bg-transparent border border-border rounded-full py-2 px-3 text-base cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed"
               title="Add photo"
             >📷</button>
             <button
               onClick={() => { setShowWorkoutPicker((v) => !v); setShowGamePicker(false); }}
-              className={`border rounded-md py-2 px-3 text-base cursor-pointer ${linkedWorkoutLogId ? 'bg-accent border-accent' : 'bg-transparent border-border'}`}
+              className={`border rounded-full py-2 px-3 text-base cursor-pointer ${linkedWorkoutLogId ? 'bg-accent border-accent' : 'bg-transparent border-border'}`}
               title="Link workout"
             >🏋️</button>
             <button
               onClick={() => { setShowGamePicker((v) => !v); setShowWorkoutPicker(false); }}
-              className={`border rounded-md py-2 px-3 text-base cursor-pointer ${linkedGameId ? 'bg-accent border-accent' : 'bg-transparent border-border'}`}
+              className={`border rounded-full py-2 px-3 text-base cursor-pointer ${linkedGameId ? 'bg-accent border-accent' : 'bg-transparent border-border'}`}
               title="Link game"
             >🏸</button>
           </div>

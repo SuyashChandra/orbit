@@ -45,10 +45,10 @@ export function WorkoutList() {
   return (
     <div className="flex flex-col gap-4">
       <div className="flex items-center justify-between">
-        <h3 className="text-lg font-bold text-fg">My Workouts</h3>
+        <h3 className="font-display text-lg font-semibold text-fg">My Workouts</h3>
         <button
           onClick={() => setCreating(true)}
-          className="py-2 px-4 bg-accent text-on-accent border-none rounded-md text-base font-semibold cursor-pointer"
+          className="py-2 px-4 bg-accent text-on-accent border-none rounded-full text-base font-semibold cursor-pointer"
         >
           + New
         </button>
@@ -85,9 +85,9 @@ export function WorkoutList() {
 
       <div className="flex flex-col gap-3">
         {workoutsQ.data?.map((w) => (
-          <div key={w.id} className="flex items-center bg-surface border border-border rounded-lg overflow-hidden">
+          <div key={w.id} className="flex items-center bg-surface rounded-lg overflow-hidden">
             <button onClick={() => setEditing(w)} className="flex-1 p-4 bg-transparent border-none text-left cursor-pointer">
-              <p className="text-lg font-bold text-fg">{w.name}</p>
+              <p className="font-display text-lg font-semibold text-fg">{w.name}</p>
               <p className="text-sm text-fg-muted mt-1">
                 {w.exercises.length} exercise{w.exercises.length !== 1 ? 's' : ''}
                 {w.exercises.length > 0 && ` · ${w.exercises.map((e) => e.exercise.name).slice(0, 3).join(', ')}${w.exercises.length > 3 ? '…' : ''}`}

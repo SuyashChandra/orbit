@@ -11,12 +11,12 @@ const STATUS_META: Record<string, PillMeta> = {
   interviewing: { label: 'Interviewing', color: 'var(--color-warning)',       bg: 'rgba(227, 168, 106, 0.13)' },
   offer:        { label: 'Offer',        color: 'var(--color-warm)',          bg: 'rgba(230, 199, 154, 0.13)' },
   rejected:     { label: 'Rejected',     color: 'var(--color-danger)',        bg: 'rgba(224, 128, 112, 0.13)' },
-  withdrawn:    { label: 'Withdrawn',    color: 'var(--color-text-deep)',     bg: 'var(--color-surface-2)' },
+  withdrawn:    { label: 'Withdrawn',    color: 'var(--color-fg-dim)',        bg: 'var(--color-surface-2)' },
   // Game statuses
   upcoming:     { label: 'Upcoming',     color: 'var(--color-accent-bright)', bg: 'var(--color-accent-soft)' },
   ongoing:      { label: 'Ongoing',      color: 'var(--color-warning)',       bg: 'rgba(227, 168, 106, 0.13)' },
   completed:    { label: 'Completed',    color: 'var(--color-warm)',          bg: 'rgba(230, 199, 154, 0.13)' },
-  cancelled:    { label: 'Cancelled',    color: 'var(--color-text-deep)',     bg: 'var(--color-surface-2)' },
+  cancelled:    { label: 'Cancelled',    color: 'var(--color-fg-dim)',        bg: 'var(--color-surface-2)' },
 };
 
 interface Props {
@@ -28,7 +28,7 @@ interface Props {
 export function Pill({ status, label }: Props) {
   const meta = STATUS_META[status] ?? {
     label: status,
-    color: 'var(--color-text-secondary)',
+    color: 'var(--color-fg-muted)',
     bg: 'var(--color-surface-2)',
   };
   return (

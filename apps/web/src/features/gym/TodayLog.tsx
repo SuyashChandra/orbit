@@ -79,7 +79,7 @@ export function TodayLog() {
   return (
     <div className="flex flex-col gap-4">
       <div className="mb-2">
-        <h3 className="text-lg font-bold text-fg">
+        <h3 className="font-display text-lg font-semibold text-fg">
           {new Date(today + 'T00:00:00').toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })}
         </h3>
       </div>
@@ -90,13 +90,13 @@ export function TodayLog() {
           <div className="flex flex-col gap-2 w-full max-w-[280px]">
             <button
               onClick={() => setShowWorkoutPicker(true)}
-              className="py-3 px-4 bg-accent text-on-accent border-none rounded-md text-base font-semibold cursor-pointer"
+              className="py-3 px-4 bg-accent text-on-accent border-none rounded-full text-base font-semibold cursor-pointer"
             >
               Start from Workout
             </button>
             <button
               onClick={() => createLogMutation.mutate(undefined)}
-              className="py-3 px-4 bg-transparent border border-border rounded-md text-base text-fg-muted cursor-pointer"
+              className="py-3 px-4 bg-transparent border border-border rounded-full text-base text-fg-muted cursor-pointer"
             >
               Log ad-hoc
             </button>
@@ -138,15 +138,15 @@ export function TodayLog() {
       {showWorkoutPicker && (
         <div
           className="fixed inset-0 z-[200] flex items-end"
-          style={{ backgroundColor: 'rgba(0,0,0,0.6)' }}
+          style={{ backgroundColor: 'rgba(8, 16, 12, 0.6)', backdropFilter: 'blur(4px)' }}
           onClick={() => setShowWorkoutPicker(false)}
         >
           <div
-            className="w-full max-w-[480px] mx-auto bg-bg p-4 flex flex-col gap-3 max-h-[70dvh] overflow-y-auto"
-            style={{ borderRadius: 'var(--radius-lg) var(--radius-lg) 0 0' }}
+            className="w-full max-w-[480px] mx-auto bg-surface p-4 flex flex-col gap-3 max-h-[70dvh] overflow-y-auto"
+            style={{ borderRadius: '28px 28px 0 0' }}
             onClick={(e) => e.stopPropagation()}
           >
-            <p className="text-lg font-bold text-fg">Pick a Workout</p>
+            <p className="font-display text-lg font-semibold text-fg">Pick a Workout</p>
             {workoutsQ.data?.length === 0 && (
               <p className="text-fg-muted text-sm text-center">No workouts. Create one in the Workouts tab.</p>
             )}
@@ -168,16 +168,16 @@ export function TodayLog() {
       {selectedExercise && (
         <div
           className="fixed inset-0 z-[200] flex items-end"
-          style={{ backgroundColor: 'rgba(0,0,0,0.6)' }}
+          style={{ backgroundColor: 'rgba(8, 16, 12, 0.6)', backdropFilter: 'blur(4px)' }}
           onClick={() => setSelectedExercise(null)}
         >
           <div
-            className="w-full max-w-[480px] mx-auto bg-bg p-4 flex flex-col gap-3 max-h-[70dvh] overflow-y-auto"
-            style={{ borderRadius: 'var(--radius-lg) var(--radius-lg) 0 0' }}
+            className="w-full max-w-[480px] mx-auto bg-surface p-4 flex flex-col gap-3 max-h-[70dvh] overflow-y-auto"
+            style={{ borderRadius: '28px 28px 0 0' }}
             onClick={(e) => e.stopPropagation()}
           >
             <div className="flex items-center justify-between">
-              <p className="text-lg font-bold text-fg">{selectedExercise.name}</p>
+              <p className="font-display text-lg font-semibold text-fg">{selectedExercise.name}</p>
               <button
                 onClick={() => setSelectedExercise(null)}
                 className="bg-transparent border-none text-fg-muted text-lg cursor-pointer"
@@ -224,7 +224,7 @@ function ExerciseLogCard({
   const [weight, setWeight] = useState('');
 
   return (
-    <div className="bg-surface border border-border rounded-lg p-4 flex flex-col gap-3">
+    <div className="bg-surface rounded-lg p-4 flex flex-col gap-3">
       <div className="flex items-center justify-between">
         <p className="text-base font-bold text-fg">{exercise.name}</p>
         <button onClick={onShowHistory} className="bg-transparent border-none text-[18px] cursor-pointer">📈</button>
@@ -261,7 +261,7 @@ function ExerciseLogCard({
           onChange={(e) => setReps(e.target.value)}
           placeholder="Reps"
           min="0"
-          className="flex-1 py-2 bg-bg border border-border rounded-md text-fg text-base text-center"
+          className="flex-1 py-2 bg-surface-2 border-none rounded-md text-fg text-base text-center"
         />
         <input
           type="number"
@@ -270,7 +270,7 @@ function ExerciseLogCard({
           placeholder="kg"
           min="0"
           step="0.5"
-          className="flex-1 py-2 bg-bg border border-border rounded-md text-fg text-base text-center"
+          className="flex-1 py-2 bg-surface-2 border-none rounded-md text-fg text-base text-center"
         />
         <button
           onClick={() => {
@@ -326,16 +326,16 @@ function AdHocExerciseAdder({ logId, onAdded }: { logId: string; onAdded: () => 
   return (
     <div
       className="fixed inset-0 z-[200] flex items-end"
-      style={{ backgroundColor: 'rgba(0,0,0,0.6)' }}
+      style={{ backgroundColor: 'rgba(8, 16, 12, 0.6)', backdropFilter: 'blur(4px)' }}
       onClick={() => setShow(false)}
     >
       <div
-        className="w-full max-w-[480px] mx-auto bg-bg p-4 flex flex-col gap-3 max-h-[70dvh] overflow-y-auto"
-        style={{ borderRadius: 'var(--radius-lg) var(--radius-lg) 0 0' }}
+        className="w-full max-w-[480px] mx-auto bg-surface p-4 flex flex-col gap-3 max-h-[70dvh] overflow-y-auto"
+        style={{ borderRadius: '28px 28px 0 0' }}
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex items-center justify-between">
-          <p className="text-lg font-bold text-fg">Add Exercise</p>
+          <p className="font-display text-lg font-semibold text-fg">Add Exercise</p>
           <button onClick={() => setShow(false)} className="bg-transparent border-none text-fg-muted text-lg cursor-pointer">✕</button>
         </div>
         <input

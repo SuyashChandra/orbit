@@ -76,7 +76,7 @@ export function ExerciseBrowser() {
       <div className="flex justify-end">
         <button
           onClick={() => setShowCustomForm(true)}
-          className="py-1 px-3 bg-transparent border border-accent rounded-md text-accent text-sm cursor-pointer"
+          className="py-1 px-3 bg-transparent border border-accent rounded-full text-accent text-sm cursor-pointer"
         >
           + Custom Exercise
         </button>
@@ -89,7 +89,7 @@ export function ExerciseBrowser() {
           <button
             key={ex.id}
             onClick={() => setSelected(ex)}
-            className="flex items-center justify-between py-3 px-4 bg-surface border border-border rounded-md cursor-pointer text-left w-full"
+            className="flex items-center justify-between py-3 px-4 bg-surface rounded-md cursor-pointer text-left w-full"
           >
             <div>
               <p className="text-base font-semibold text-fg">{ex.name}</p>
@@ -111,7 +111,7 @@ export function ExerciseBrowser() {
       {/* Detail modal */}
       {selected && (
         <Modal onClose={() => setSelected(null)}>
-          <h3 className="text-xl font-bold text-fg pr-6">{selected.name}</h3>
+          <h3 className="font-display text-xl font-semibold text-fg pr-6">{selected.name}</h3>
           <p className="text-base text-fg-muted">{selected.category}</p>
           {selected.muscleGroups.length > 0 && (
             <div className="flex flex-wrap gap-2">
@@ -166,7 +166,7 @@ function CustomExerciseForm({ onClose, onSaved }: { onClose: () => void; onSaved
 
   return (
     <Modal onClose={onClose}>
-      <h3 className="text-xl font-bold text-fg pr-6">New Custom Exercise</h3>
+      <h3 className="font-display text-xl font-semibold text-fg pr-6">New Custom Exercise</h3>
       <div className="flex flex-col gap-2">
         <label className="text-sm text-fg-muted">Name *</label>
         <input
@@ -212,7 +212,7 @@ function CustomExerciseForm({ onClose, onSaved }: { onClose: () => void; onSaved
       <button
         onClick={() => mutation.mutate(form)}
         disabled={mutation.isPending || !form.name.trim() || !form.category.trim()}
-        className="py-3 px-4 bg-accent text-on-accent border-none rounded-md text-base font-semibold cursor-pointer w-full disabled:opacity-50"
+        className="py-3 px-4 bg-accent text-on-accent border-none rounded-full text-base font-semibold cursor-pointer w-full disabled:opacity-50"
       >
         {mutation.isPending ? 'Saving…' : 'Save'}
       </button>
@@ -224,12 +224,12 @@ function Modal({ children, onClose }: { children: React.ReactNode; onClose: () =
   return (
     <div
       className="fixed inset-0 z-[200] flex items-end"
-      style={{ backgroundColor: 'rgba(0,0,0,0.6)' }}
+      style={{ backgroundColor: 'rgba(8, 16, 12, 0.6)', backdropFilter: 'blur(4px)' }}
       onClick={onClose}
     >
       <div
-        className="w-full max-w-[480px] mx-auto bg-bg p-6 flex flex-col gap-4 max-h-[80dvh] overflow-y-auto relative"
-        style={{ borderRadius: 'var(--radius-lg) var(--radius-lg) 0 0' }}
+        className="w-full max-w-[480px] mx-auto bg-surface p-6 flex flex-col gap-4 max-h-[80dvh] overflow-y-auto relative"
+        style={{ borderRadius: '28px 28px 0 0' }}
         onClick={(e) => e.stopPropagation()}
       >
         <button

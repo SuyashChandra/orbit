@@ -52,7 +52,7 @@ export function PublicGamePage() {
     <div className="min-h-dvh bg-bg flex items-start justify-center p-4">
       <div className="w-full max-w-[440px] bg-surface border border-border rounded-lg p-6 flex flex-col gap-4 mt-6">
         {/* Branding */}
-        <p className="text-lg font-bold text-accent">🏸 Orbit</p>
+        <p className="font-display text-lg font-semibold italic text-accent">🏸 Orbit</p>
 
         {/* Status */}
         <span
@@ -64,7 +64,7 @@ export function PublicGamePage() {
 
         {/* Date / time */}
         <div className="flex flex-col gap-1">
-          <p className="text-xl font-bold text-fg">
+          <p className="font-display text-xl font-semibold text-fg">
             {scheduledAt.toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
           </p>
           <p className="text-lg text-fg-muted">

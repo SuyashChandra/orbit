@@ -73,7 +73,7 @@ export function ProfilePage() {
         </div>
       ) : (
         <div className="flex items-center gap-3">
-          <h2 className="text-xl font-bold text-fg">{user.name}</h2>
+          <h2 className="font-display text-xl font-semibold text-fg">{user.name}</h2>
           <button
             onClick={() => setEditing(true)}
             className="text-sm text-accent bg-transparent border-none cursor-pointer py-1 px-2"
@@ -85,7 +85,7 @@ export function ProfilePage() {
 
       <p className="text-sm text-fg-muted">{user.email}</p>
 
-      <div className="w-full max-w-[320px] bg-surface border border-border rounded-lg p-4 flex flex-col gap-2">
+      <div className="w-full max-w-[320px] bg-surface rounded-lg p-4 flex flex-col gap-2">
         <span className="text-xs text-fg-muted uppercase" style={{ letterSpacing: '0.08em' }}>Friend Code</span>
         <div className="flex items-center justify-between">
           <span className="text-xl font-bold text-accent" style={{ letterSpacing: '0.12em' }}>{user.friendCode}</span>
